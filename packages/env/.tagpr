@@ -1,0 +1,6 @@
+[tagpr]
+	vPrefix = true
+	releaseBranch = main
+	tagPrefix = packages/env
+	versionFile = packages/env/package.json,packages/env/jsr.json
+	changelog = false

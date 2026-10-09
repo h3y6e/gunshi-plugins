@@ -1,0 +1,106 @@
+name: Release package
+
+on:
+  workflow_call:
+    inputs:
+      package:
+        required: true
+        type: string
+    secrets:
+      APP_PRIVATE_KEY:
+        required: true
+
+permissions: {}
+
+concurrency:
+  group: release-${{ inputs.package }}
+  cancel-in-progress: false
+
+jobs:
+  tagpr:
+    runs-on: ubuntu-slim
+    timeout-minutes: 5
+    permissions:
+      contents: read
+    outputs:
+      tag: ${{ steps.tagpr.outputs.tag }}
+    steps:
+      - id: app-token
+        uses: actions/create-github-app-token@bcd2ba49218906704ab6c1aa796996da409d3eb1 # v3.2.0
+        with:
+          client-id: ${{ vars.APP_CLIENT_ID }}
+          private-key: ${{ secrets.APP_PRIVATE_KEY }}
+          permission-contents: write
+          permission-issues: read
+          permission-pull-requests: write
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - id: tagpr
+        uses: Songmu/tagpr@0c4eb5a3b0862693702acea436a7c68bd586530d # v1.21.2
+        with:
+          config: packages/${{ inputs.package }}/.tagpr
+        env:
+          GITHUB_TOKEN: ${{ steps.app-token.outputs.token }}
+
+  build:
+    needs: tagpr
+    if: needs.tagpr.outputs.tag != ''
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ needs.tagpr.outputs.tag }}
+          persist-credentials: false
+      - uses: jdx/mise-action@2d8d4cafcbd33be2ea37d2b6f5ad595363d1f1ca # v5.1.1
+      - run: aube install
+      - working-directory: packages/${{ inputs.package }}
+        run: aube pack --pack-destination "$RUNNER_TEMP/dist"
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: ${{ inputs.package }}
+          path: ${{ runner.temp }}/dist/*.tgz
+          if-no-files-found: error
+
+  publish-npm:
+    needs: [tagpr, build]
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ needs.tagpr.outputs.tag }}
+          persist-credentials: false
+      - uses: jdx/mise-action@2d8d4cafcbd33be2ea37d2b6f5ad595363d1f1ca # v5.1.1
+        with:
+          install_args: node
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: ${{ inputs.package }}
+          path: ${{ runner.temp }}/dist
+      - run: npm stage publish "$RUNNER_TEMP"/dist/*.tgz --access public --provenance --ignore-scripts
+
+  publish-jsr:
+    needs: tagpr
+    if: needs.tagpr.outputs.tag != ''
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ needs.tagpr.outputs.tag }}
+          persist-credentials: false
+      - uses: jdx/mise-action@2d8d4cafcbd33be2ea37d2b6f5ad595363d1f1ca # v5.1.1
+        with:
+          install_args: deno
+      - working-directory: packages/${{ inputs.package }}
+        run: deno publish
