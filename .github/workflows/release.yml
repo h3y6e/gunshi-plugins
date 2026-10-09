@@ -1,0 +1,30 @@
+name: Release
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions: {}
+
+jobs:
+  release-env:
+    uses: $/.github/workflows/release-package.yml
+    with:
+      package: env
+    secrets:
+      APP_PRIVATE_KEY: ${{ secrets.APP_PRIVATE_KEY }}
+    permissions:
+      contents: read
+      id-token: write
+
+  release-usage:
+    uses: $/.github/workflows/release-package.yml
+    with:
+      package: usage
+    secrets:
+      APP_PRIVATE_KEY: ${{ secrets.APP_PRIVATE_KEY }}
+    permissions:
+      contents: read
+      id-token: write
