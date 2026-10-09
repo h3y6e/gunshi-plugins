@@ -1,5 +1,8 @@
 # @h3y6e/gunshi-plugin-env
 
+[![npm](https://img.shields.io/npm/v/@h3y6e/gunshi-plugin-env?style=flat)](https://npmjs.com/package/@h3y6e/gunshi-plugin-env)
+[![JSR](https://jsr.io/badges/@h3y6e/gunshi-plugin-env)](https://jsr.io/@h3y6e/gunshi-plugin-env)
+
 > Fill [gunshi](https://gunshi.dev) flags from environment variables.
 
 ## Installation

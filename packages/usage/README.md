@@ -1,5 +1,8 @@
 # @h3y6e/gunshi-plugin-usage
 
+[![npm](https://img.shields.io/npm/v/@h3y6e/gunshi-plugin-usage?style=flat)](https://npmjs.com/package/@h3y6e/gunshi-plugin-usage)
+[![JSR](https://jsr.io/badges/@h3y6e/gunshi-plugin-usage)](https://jsr.io/@h3y6e/gunshi-plugin-usage)
+
 > Export a [usage](https://usage.jdx.dev) spec from a [gunshi](https://gunshi.dev) CLI.
 
 Use the spec to generate shell completions, Markdown documentation, man pages, and SDKs with the [usage CLI](https://usage.jdx.dev/cli/).
