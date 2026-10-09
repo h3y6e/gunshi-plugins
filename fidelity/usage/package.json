@@ -8,8 +8,8 @@
     "gunshi": "^1.0.0-rc.1"
   },
   "devDependencies": {
-    "@ast-grep/lang-rust": "^0.0.7",
-    "@ast-grep/napi": "^0.45.3",
-    "fast-check": "^4.10.2"
+    "@ast-grep/lang-rust": "0.0.7",
+    "@ast-grep/napi": "0.45.3",
+    "fast-check": "4.10.2"
   }
 }
