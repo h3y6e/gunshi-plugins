@@ -1,6 +1,6 @@
 {
   "name": "@h3y6e/gunshi-plugin-usage",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "description": "usage KDL spec generator for gunshi",
   "keywords": [
     "cli",
