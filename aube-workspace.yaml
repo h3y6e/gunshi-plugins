@@ -1,0 +1,7 @@
+packages:
+  - packages/*
+  - examples
+  - fidelity/*
+allowBuilds:
+  "@ast-grep/lang-rust": false
+paranoid: true
