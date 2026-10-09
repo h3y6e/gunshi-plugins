@@ -44,9 +44,9 @@
     "typecheck:deno": "deno check src/index.ts"
   },
   "devDependencies": {
-    "gunshi": "^1.0.0-rc.1",
-    "publint": "^0.3.25",
-    "tsdown": "^0.23.0"
+    "gunshi": "1.0.0-rc.1",
+    "publint": "0.3.25",
+    "tsdown": "0.23.0"
   },
   "peerDependencies": {
     "gunshi": "^1.0.0-rc.1"
