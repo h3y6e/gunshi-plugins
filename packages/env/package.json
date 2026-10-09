@@ -1,0 +1,57 @@
+{
+  "name": "@h3y6e/gunshi-plugin-env",
+  "version": "0.0.0",
+  "description": "gunshi plugin that fills flags from environment variables",
+  "keywords": [
+    "cli",
+    "env",
+    "gunshi",
+    "plugin"
+  ],
+  "bugs": {
+    "url": "https://github.com/h3y6e/gunshi-plugins/issues"
+  },
+  "license": "MIT",
+  "author": "h3y6e",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/h3y6e/gunshi-plugins.git",
+    "directory": "packages/env"
+  },
+  "files": [
+    "lib"
+  ],
+  "type": "module",
+  "sideEffects": false,
+  "module": "lib/index.js",
+  "types": "lib/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./lib/index.d.ts",
+      "import": "./lib/index.js",
+      "require": "./lib/index.js",
+      "default": "./lib/index.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "build": "tsdown",
+    "lint:jsr": "deno publish --dry-run --allow-dirty",
+    "prepack": "aubr build",
+    "typecheck:deno": "deno check src/index.ts"
+  },
+  "devDependencies": {
+    "gunshi": "^1.0.0-rc.1",
+    "publint": "^0.3.25",
+    "tsdown": "^0.23.0"
+  },
+  "peerDependencies": {
+    "gunshi": "^1.0.0-rc.1"
+  },
+  "engines": {
+    "node": ">= 22.12"
+  }
+}

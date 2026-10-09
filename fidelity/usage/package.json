@@ -1,0 +1,15 @@
+{
+  "name": "usage-fidelity",
+  "private": true,
+  "type": "module",
+  "dependencies": {
+    "@h3y6e/gunshi-plugin-env": "workspace:*",
+    "@h3y6e/gunshi-plugin-usage": "workspace:*",
+    "gunshi": "^1.0.0-rc.1"
+  },
+  "devDependencies": {
+    "@ast-grep/lang-rust": "^0.0.7",
+    "@ast-grep/napi": "^0.45.3",
+    "fast-check": "^4.10.2"
+  }
+}

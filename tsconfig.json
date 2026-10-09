@@ -1,0 +1,12 @@
+{
+  "compilerOptions": {
+    "target": "es2024",
+    "module": "nodenext",
+    "strict": true,
+    "noEmit": true,
+    "allowImportingTsExtensions": true,
+    "types": ["node"]
+  },
+  "include": ["packages", "examples", "fidelity", "*.config.ts"],
+  "exclude": ["**/node_modules", "packages/*/lib", "packages/*/tsdown.config.ts"]
+}

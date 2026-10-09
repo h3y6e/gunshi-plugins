@@ -1,0 +1,43 @@
+[tools]
+aube = "2.7.0"
+bun = "1.4.2"
+deno = "2.9.7"
+node = "26.11.1"
+usage = "6.12.1"
+
+[tasks.build]
+run = "aubr -r --if-present build"
+
+[tasks."fmt:check"]
+run = "aubr fmt:check"
+
+[tasks.lint]
+depends = ["build"]
+run = "aubr lint"
+
+[tasks.test]
+run = "aubr test"
+
+[tasks.e2e]
+depends = ["build"]
+run = "aubr e2e"
+
+[tasks."typecheck:deno"]
+run = "aubr -r --if-present typecheck:deno"
+
+[tasks."lint:jsr"]
+run = "aubr -r --if-present lint:jsr"
+
+[tasks."fidelity:vocabulary"]
+run = "node fidelity/usage/coverage/extract.ts"
+
+[tasks."fidelity:render"]
+depends = ["build"]
+run = ["node fidelity/usage/render.ts", "aubr fmt fidelity/usage"]
+
+[tasks.fidelity]
+depends = ["build"]
+run = "aubr fidelity"
+
+[tasks.check]
+depends = ["fmt:check", "lint", "test", "fidelity", "e2e", "typecheck:deno", "lint:jsr"]

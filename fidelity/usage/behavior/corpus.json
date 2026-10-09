@@ -1,0 +1,163 @@
+{
+  "vectors": [
+    {
+      "id": "negate-attached-value",
+      "doc": "`--no-x=false` binds x to true.",
+      "command": {
+        "args": {
+          "color": {
+            "type": "boolean",
+            "negatable": true
+          }
+        }
+      },
+      "argv": ["--no-color=false"],
+      "expect": {
+        "ok": {
+          "flags": {
+            "color": true
+          }
+        }
+      },
+      "gunshi": {
+        "diverges": "Rejects any value on the negated spelling."
+      }
+    },
+    {
+      "id": "flag-before-subcommand",
+      "doc": "A subcommand's flag before the subcommand belongs to the parent, which lacks it.",
+      "command": {
+        "args": {},
+        "subCommands": {
+          "sub": {
+            "args": {
+              "alpha": {
+                "type": "boolean"
+              }
+            }
+          }
+        }
+      },
+      "argv": ["--alpha", "sub"],
+      "expect": {
+        "error": "unknown_flag"
+      },
+      "gunshi": {
+        "diverges": "Binds the flag to the subcommand wherever it appears."
+      }
+    },
+    {
+      "id": "short-group-value",
+      "doc": "A value-taking short flag inside a group takes the next word.",
+      "command": {
+        "args": {
+          "alpha": {
+            "type": "string",
+            "short": "a"
+          },
+          "dryRun": {
+            "type": "boolean",
+            "short": "d"
+          }
+        }
+      },
+      "argv": ["-ad", "p"],
+      "expect": {
+        "ok": {
+          "flags": {
+            "alpha": "p",
+            "dryRun": true
+          }
+        }
+      },
+      "gunshi": {
+        "diverges": "Gives it only the rest of the group, so its value is missing."
+      }
+    },
+    {
+      "id": "variadic-before-required",
+      "doc": "A variadic positional before a required one takes every word.",
+      "command": {
+        "args": {
+          "files": {
+            "type": "positional",
+            "multiple": true
+          },
+          "dest": {
+            "type": "positional"
+          }
+        }
+      },
+      "argv": ["a", "b", "c"],
+      "expect": {
+        "error": "missing_required_arg"
+      },
+      "gunshi": {
+        "diverges": "Leaves the last word for the required positional."
+      }
+    },
+    {
+      "id": "short-attached-equals",
+      "doc": "A short flag takes no value after `=`.",
+      "command": {
+        "args": {
+          "alpha": {
+            "type": "string",
+            "short": "a"
+          }
+        }
+      },
+      "argv": ["-a=foo"],
+      "expect": {
+        "error": "unknown_flag"
+      },
+      "gunshi": {
+        "diverges": "Binds the value after `=`."
+      }
+    },
+    {
+      "id": "dash-value",
+      "doc": "A value-taking flag takes a following word that starts with `-`.",
+      "command": {
+        "args": {
+          "alpha": {
+            "type": "string"
+          }
+        }
+      },
+      "argv": ["--alpha", "-3"],
+      "expect": {
+        "ok": {
+          "flags": {
+            "alpha": "-3"
+          }
+        }
+      },
+      "gunshi": {
+        "diverges": "Reads that word as a flag, so the value is missing."
+      }
+    },
+    {
+      "id": "number-value",
+      "doc": "A flag value is any string; the spec has no type for flags.",
+      "command": {
+        "args": {
+          "jobs": {
+            "type": "number"
+          }
+        }
+      },
+      "argv": ["--jobs", "nope"],
+      "expect": {
+        "ok": {
+          "flags": {
+            "jobs": "nope"
+          }
+        }
+      },
+      "gunshi": {
+        "diverges": "Rejects a value that is not a number."
+      }
+    }
+  ]
+}
