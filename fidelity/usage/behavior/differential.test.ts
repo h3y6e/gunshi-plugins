@@ -2,6 +2,7 @@ import { mkdtempSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 
+import { withEnv } from "@h3y6e/gunshi-plugin-env";
 import fc from "fast-check";
 import type { ArgSchema } from "gunshi";
 import { afterAll, expect, test } from "vitest";
@@ -17,6 +18,12 @@ afterAll(() => {
 
 const names = ["alpha", "beta", "dryRun", "outputURL"] as const;
 const shorts: Record<string, string> = { alpha: "a", beta: "b", dryRun: "d", outputURL: "o" };
+const variables: Record<string, string> = {
+  alpha: "EX_ALPHA",
+  beta: "EX_BETA",
+  dryRun: "EX_DRY_RUN",
+  outputURL: "EX_OUTPUT_URL",
+};
 
 const flag = (name: (typeof names)[number]) =>
   fc
@@ -27,6 +34,7 @@ const flag = (name: (typeof names)[number]) =>
       default: fc.boolean(),
       multiple: fc.boolean(),
       negatable: fc.boolean(),
+      env: fc.boolean(),
       conflicts: fc.option(fc.constantFrom(...names.filter((n) => n !== name)), { nil: undefined }),
     })
     .map((f): ArgSchema => {
@@ -34,17 +42,19 @@ const flag = (name: (typeof names)[number]) =>
         ...(f.short && { short: shorts[name] }),
         ...(f.conflicts && { conflicts: f.conflicts }),
       };
-      if (f.type === "boolean") return { type: "boolean", negatable: f.negatable, ...common };
+      const read = <S extends ArgSchema & { type: "boolean" | "string" | "enum" }>(schema: S) =>
+        f.env ? withEnv(schema, variables[name] ?? "") : schema;
+      if (f.type === "boolean") return read({ type: "boolean", negatable: f.negatable, ...common });
       const value =
         f.type === "enum"
           ? { type: "enum" as const, choices: ["a", "b"] }
           : { type: "string" as const };
-      return {
+      return read({
         ...value,
         ...common,
         ...(f.required ? { required: true } : f.default && { default: "a" }),
         ...(f.multiple && { multiple: true }),
-      };
+      });
     });
 
 const positional = fc.constantFrom<ArgSchema>(

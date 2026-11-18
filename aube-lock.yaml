@@ -31,10 +31,10 @@ importers:
     dependencies:
       '@h3y6e/gunshi-plugin-env':
         specifier: workspace:*
-        version: 0.1.0
+        version: link:../packages/env
       '@h3y6e/gunshi-plugin-usage':
         specifier: workspace:*
-        version: 0.1.0
+        version: link:../packages/usage
       gunshi:
         specifier: ^1.0.0-rc.1
         version: 1.0.0-rc.1
@@ -43,10 +43,10 @@ importers:
     dependencies:
       '@h3y6e/gunshi-plugin-env':
         specifier: workspace:*
-        version: 0.1.0
+        version: link:../../packages/env
       '@h3y6e/gunshi-plugin-usage':
         specifier: workspace:*
-        version: 0.1.0
+        version: link:../../packages/usage
       gunshi:
         specifier: ^1.0.0-rc.1
         version: 1.0.0-rc.1
@@ -75,6 +75,9 @@ importers:
 
   packages/usage:
     devDependencies:
+      '@h3y6e/gunshi-plugin-env':
+        specifier: workspace:*
+        version: link:../env
       gunshi:
         specifier: 1.0.0-rc.1
         version: 1.0.0-rc.1

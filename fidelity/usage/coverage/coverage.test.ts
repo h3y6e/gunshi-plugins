@@ -5,7 +5,7 @@ import { fileURLToPath } from "node:url";
 import { describe, expect, test } from "vitest";
 
 import { properties, vocabulary } from "./data.ts";
-import { baseline, mapping, samples } from "./mapping.ts";
+import { baseline, mapping, pluginSamples, samples } from "./mapping.ts";
 
 describe("fidelity coverage", () => {
   test("when mise pins a usage version, the vocabulary was extracted from that version", () => {
@@ -33,13 +33,32 @@ describe("fidelity coverage", () => {
     expect(declared.sort()).toEqual(Object.keys(samples).sort());
   });
 
+  test("when the usage plugin declares metadata and options, every one has a sample", () => {
+    // Arrange
+    const src = join(import.meta.dirname, "../../../packages/usage/src");
+
+    // Act
+    const declared = properties(
+      [join(src, "meta.ts"), join(src, "spec.ts")],
+      ["UsageMeta", "UsageOutput", "UsageOptions"],
+    );
+
+    // Assert
+    expect(declared.sort()).toEqual(
+      Object.keys(pluginSamples)
+        .filter((k) => !k.endsWith("()"))
+        .sort(),
+    );
+  });
+
   test("when the samples are generated, every key they produce is in the usage vocabulary", async () => {
     // Arrange
     const keys = new Set(vocabulary.keys);
 
     // Act
     const produced = [...(await baseline())];
-    for (const sample of Object.values(samples)) produced.push(...(await mapping(sample)).keys);
+    for (const sample of Object.values({ ...samples, ...pluginSamples }))
+      produced.push(...(await mapping(sample)).keys);
 
     // Assert
     expect(produced.filter((k) => !keys.has(k))).toEqual([]);

@@ -1,7 +1,8 @@
 import { cli, define } from "gunshi";
+import { plugin } from "gunshi/plugin";
 import { afterEach, describe, expect, test, vi } from "vitest";
 
-import env, { pluginId } from "./index.ts";
+import env, { withEnv } from "./index.ts";
 
 afterEach(() => {
   vi.restoreAllMocks();
@@ -11,14 +12,15 @@ afterEach(() => {
 const command = define({
   name: "greet",
   args: {
-    loud: { type: "boolean" },
-    dryRun: { type: "boolean" },
-    times: { type: "number" },
-    mode: { type: "enum", choices: ["fast", "safe"] },
-    tag: { type: "string", multiple: true },
-    from: { type: "string", conflicts: "to" },
+    loud: withEnv({ type: "boolean" }, "GREET_LOUD"),
+    dryRun: withEnv({ type: "boolean" }, "GREET_DRY_RUN"),
+    times: withEnv({ type: "number" }, "GREET_TIMES"),
+    mode: withEnv({ type: "enum", choices: ["fast", "safe"] }, "GREET_MODE"),
+    tag: withEnv({ type: "string", multiple: true }, "GREET_TAG"),
+    from: withEnv({ type: "string", conflicts: "to" }, "GREET_FROM"),
     to: { type: "string" },
-    token: { type: "string", required: true },
+    token: withEnv({ type: "string", required: true }, "GREET_TOKEN"),
+    plain: { type: "string" },
     target: { type: "positional", required: false },
   },
   run: (c) => console.log(JSON.stringify(c.values)),
@@ -44,7 +46,7 @@ describe("env", () => {
     { variables: { GREET_DRY_RUN: "true" }, values: { dryRun: true } },
     { variables: { GREET_TIMES: "3" }, values: { times: 3 } },
     { variables: { GREET_TAG: "a,b" }, values: { tag: ["a,b"] } },
-    { variables: { GREET_TARGET: "world" }, values: {} },
+    { variables: { GREET_TARGET: "world", GREET_PLAIN: "p" }, values: {} },
   ])("when $variables is set, the command receives $values", async ({ variables, values }) => {
     // Arrange
     const argv = ["--token", "t"];
@@ -109,40 +111,13 @@ describe("env", () => {
     expect(error).toMatchObject({ errors: [{ code: "err:arg:required-option" }] });
   });
 
-  test.each([
-    { cli: "my-cli", key: "dryRun", variable: "MY_CLI_DRY_RUN" },
-    { cli: "greet", key: "outputURL", variable: "GREET_OUTPUT_URL" },
-    { cli: "MyCLI", key: "userID", variable: "MY_CLI_USER_ID" },
-  ])(
-    "when a command of $cli reads the extension for $key, it gets $variable",
-    async ({ cli: name, key, variable }) => {
-      // Arrange
-      const names: string[] = [];
-      const named = define({
-        name,
-        run: (c) =>
-          void names.push(
-            (c.extensions as Record<string, { name: (k: string) => string }>)[pluginId]?.name(
-              key,
-            ) ?? "",
-          ),
-      });
-
-      // Act
-      await cli([], named, { name, renderHeader: null, plugins: [env()] });
-
-      // Assert
-      expect(names).toEqual([variable]);
-    },
-  );
-
   test("when a variable fills a flag that conflicts with a positional given on the command line, running the command rejects with gunshi's conflict error", async () => {
     // Arrange
     vi.stubEnv("GREET_FROM", "a");
     const conflicting = define({
       name: "greet",
       args: {
-        from: { type: "string", conflicts: "target" },
+        from: withEnv({ type: "string", conflicts: "target" }, "GREET_FROM"),
         target: { type: "positional", required: false },
       },
       run: () => {},
@@ -160,36 +135,25 @@ describe("env", () => {
     await expect(running).rejects.toMatchObject({ errors: [{ code: "err:arg:conflict" }] });
   });
 
-  test("when a command declares its own version flag, its variable fills it", async () => {
+  test("when a plugin adds a global option with a variable, the variable fills it in every command", async () => {
     // Arrange
-    vi.stubEnv("GREET_VERSION", "9.9.9");
-    const versioned = define({
-      name: "greet",
-      args: { version: { type: "string" } },
-      run: (c) => console.log(JSON.stringify(c.values)),
+    vi.stubEnv("APP_PROJECT", "web");
+    const global = plugin({
+      id: "x:global",
+      setup: (ctx) => ctx.addGlobalOption("project", withEnv({ type: "string" }, "APP_PROJECT")),
     });
+    const show = define({ name: "show", run: (c) => console.log(JSON.stringify(c.values)) });
     const log = vi.spyOn(console, "log").mockImplementation(() => {});
 
     // Act
-    await cli([], versioned, {
-      name: "greet",
-      version: "1.0.0",
+    await cli(["show"], define({ run: () => {} }), {
+      name: "app",
+      subCommands: { show },
       renderHeader: null,
-      plugins: [env()],
+      plugins: [global, env()],
     });
 
     // Assert
-    expect(JSON.parse(String(log.mock.calls[0]?.[0]))).toEqual({ version: "9.9.9" });
-  });
-
-  test("when the CLI has no name, running it rejects because the variables cannot be named", async () => {
-    // Arrange
-    const unnamed = define({ run: () => {} });
-
-    // Act
-    const run = cli([], unnamed, { renderHeader: null, plugins: [env()] });
-
-    // Assert
-    await expect(run).rejects.toThrow("give cli() a name");
+    expect(JSON.parse(String(log.mock.calls[0]?.[0]))).toMatchObject({ project: "web" });
   });
 });

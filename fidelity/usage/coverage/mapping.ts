@@ -1,4 +1,6 @@
-import env from "@h3y6e/gunshi-plugin-env";
+import env, { withEnv } from "@h3y6e/gunshi-plugin-env";
+import { complete, withUsage } from "@h3y6e/gunshi-plugin-usage";
+import type { UsageMeta, UsageOptions, UsageOutput } from "@h3y6e/gunshi-plugin-usage";
 import { define, plugin } from "gunshi";
 import type { ArgSchema, CliOptions, Command } from "gunshi";
 
@@ -6,8 +8,8 @@ import { specOf } from "../spec.ts";
 import { keysOf } from "./keys.ts";
 
 type Definition = Partial<Command> & { args?: Record<string, ArgSchema> };
-type Variant = { entry: Definition; options: Partial<CliOptions> };
-type Sample = (on: boolean) => Variant[];
+type Variant = { entry: Definition; options: Partial<CliOptions>; usage?: UsageOptions };
+export type Sample = (on: boolean) => Variant[];
 
 const run = () => {};
 
@@ -126,9 +128,64 @@ export const samples: Record<string, Sample> = {
   "CliOptions.onErrorCommand": options({ onErrorCommand: run }),
 };
 
+const meta = (on: boolean, m: UsageMeta) => (on ? withUsage({}, m) : {});
+
+const outputs = (o: UsageOutput): Sample =>
+  command((on) => ({
+    args: { json: { type: "boolean" } },
+    ...withUsage({}, { outputs: { o: on ? o : {} } }),
+  }));
+
+const usageOptions =
+  (o: UsageOptions): Sample =>
+  (on) => [
+    {
+      entry: {},
+      options: {
+        subCommands: { sub: define({ name: "sub", run }) },
+        plugins: [plugin({ id: "x:g", setup: (ctx) => ctx.addGlobalOption("g", string) })],
+      },
+      usage: on ? o : {},
+    },
+  ];
+
+const shared = { dryRun: { type: "boolean" } } as const;
+
+export const pluginSamples: Record<string, Sample> = {
+  "UsageMeta.effect": command((on) => meta(on, { effect: "write" })),
+  "UsageMeta.longDescription": command((on) => meta(on, { longDescription: "d" })),
+  "UsageMeta.subcommandRequired": command((on) => ({
+    subCommands: { inner: define({ name: "inner", run }) },
+    ...meta(on, { subcommandRequired: true }),
+  })),
+  "UsageMeta.outputs": command((on) => meta(on, { outputs: { text: {} } })),
+  "UsageMeta.exitCodes": command((on) => meta(on, { exitCodes: { 0: "ok" } })),
+  "UsageOutput.description": outputs({ description: "d" }),
+  "UsageOutput.default": outputs({ default: true }),
+  "UsageOutput.hidden": outputs({ hidden: true }),
+  "UsageOutput.mediaType": outputs({ mediaType: "application/json" }),
+  "UsageOutput.framing": outputs({ framing: "json" }),
+  "UsageOutput.select": outputs({ select: "json" }),
+  "UsageOutput.schema": outputs({ schema: "{}" }),
+  "UsageOptions.name": usageOptions({ name: "App" }),
+  "UsageOptions.description": usageOptions({ description: "d" }),
+  "UsageOptions.flagsets": (on) =>
+    command(() => ({ args: { ...shared } }))(on).map((v) => ({
+      ...v,
+      usage: on ? { flagsets: { shared } } : {},
+    })),
+  "UsageOptions.declaredOnly": usageOptions({ declaredOnly: true }),
+  "complete()": arg([string, complete(string, "dir")], [positional, complete(positional, "file")]),
+  "withEnv()": (on) =>
+    arg([string, withEnv({ type: "string" }, "APP_FOO_BAR")])(on).map((v) => ({
+      ...v,
+      options: { ...v.options, plugins: [env()] },
+    })),
+};
+
 async function spec(variant: Variant): Promise<string> {
   const entry = { name: "app", run, ...variant.entry } as never;
-  return specOf(entry, { name: "app", ...variant.options });
+  return specOf(entry, { name: "app", ...variant.options }, variant.usage);
 }
 
 function added(after: string[], before: string[]): string[] {

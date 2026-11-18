@@ -19,7 +19,7 @@ describe.each([
     });
   }
 
-  test("when the command is quiet, it names the variable that makes it shout", () => {
+  test("when neither --loud nor GREET_LOUD is given, the command does not shout", () => {
     // Arrange
     const argv: string[] = [];
 
@@ -27,7 +27,7 @@ describe.each([
     const result = run(argv);
 
     // Assert
-    expect(result.stdout, result.stderr).toContain("hello (GREET_LOUD=1 to shout)");
+    expect(result.stdout, result.stderr).toContain("hello");
   });
 
   test("when GREET_LOUD is set and --loud is absent, the command shouts", () => {
