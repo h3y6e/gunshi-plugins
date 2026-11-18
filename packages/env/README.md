@@ -20,43 +20,35 @@ Requires gunshi 1.x.
 ## Usage
 
 ```ts
-import env, { pluginId } from "@h3y6e/gunshi-plugin-env";
-import type { EnvExtension, PluginId } from "@h3y6e/gunshi-plugin-env";
-import { cli, defineWithTypes } from "gunshi";
+import env, { withEnv } from "@h3y6e/gunshi-plugin-env";
+import { cli, define } from "gunshi";
 
-const command = defineWithTypes<{ extensions: Record<PluginId, EnvExtension> }>()({
+const command = define({
   name: "greet",
   args: {
-    loud: { type: "boolean", description: "Shout" },
+    loud: withEnv({ type: "boolean", description: "Shout" }, "GREET_LOUD"),
   },
-  run: (ctx) => {
-    if (ctx.values.loud) return console.log("HELLO!");
-    console.log(`hello (${ctx.extensions[pluginId].name("loud")}=1 to shout)`);
-  },
+  run: (ctx) => console.log(ctx.values.loud ? "HELLO!" : "hello"),
 });
 
 await cli(process.argv.slice(2), command, { name: "greet", plugins: [env()] });
 ```
 
 ```sh
-greet               # hello (GREET_LOUD=1 to shout)
+greet               # hello
 greet --loud        # HELLO!
 GREET_LOUD=1 greet  # HELLO!
 ```
 
 ## Features
 
-### Variable names
+### Variables
 
-A flag not given on the command line takes `<CLI>_<FLAG>` in upper snake case: `--dry-run` of `greet` reads `GREET_DRY_RUN`. Positionals, `--help`, and `--version` are not filled.
+`withEnv(schema, name)` lets a flag take the value of the variable `name` when the command line does not give it. Other flags never read variables. It works on the global options that plugins add as well.
 
 ### Values
 
 As in [usage](https://usage.jdx.dev), a boolean is true only for `1`, `true`, `True`, or `TRUE`. Other types are parsed and validated by gunshi as on the command line, `conflicts` included.
-
-### Context extension
-
-`ctx.extensions[pluginId].name(key)` returns the variable of a flag.
 
 ## Limitations
 

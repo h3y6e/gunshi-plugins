@@ -5,27 +5,25 @@
 
 import { parseArgs, resolveArgs } from "gunshi";
 import { plugin } from "gunshi/plugin";
-import type { ArgSchema, PluginWithExtension } from "gunshi/plugin";
+import type { ArgSchema, PluginWithoutExtension } from "gunshi/plugin";
 import { kebabnize } from "gunshi/utils";
 
 /** The unique identifier of the env plugin */
 export const pluginId = "h3y6e:env" as const;
 export type PluginId = typeof pluginId;
 
-/** The env plugin's extension on the command context */
-export interface EnvExtension {
-  /** The environment variable that fills the flag with this key */
-  name: (key: string) => string;
-}
-
-const BUILTINS = new Set(["help", "version"]);
-
-function snake(text: string): string {
-  return text
-    .replaceAll(/([a-z0-9])([A-Z])|([A-Z])([A-Z][a-z])/g, "$1$3_$2$4")
-    .replaceAll(/[^A-Za-z0-9]+/g, "_")
-    .replaceAll(/^_|_$/g, "")
-    .toUpperCase();
+/**
+ * Let a flag take the value of an environment variable when the command line does not give it
+ *
+ * @param schema - The flag's schema
+ * @param name - The environment variable
+ * @returns A new schema that reads `name`
+ */
+export function withEnv<S extends ArgSchema & { type: Exclude<ArgSchema["type"], "positional"> }>(
+  schema: S,
+  name: string,
+): S & { env: string } {
+  return { ...schema, env: name };
 }
 
 function flagName(key: string, arg: ArgSchema, toKebab: boolean | undefined): string {
@@ -58,35 +56,28 @@ function conflictError(
 /**
  * Env plugin
  *
- * A flag that is not given on the command line takes the value of `<CLI>_<FLAG>`, both in upper
- * snake case. As in usage, a boolean is true for `1`, `true`, `True`, or `TRUE` and false
- * otherwise; any other type is parsed and validated by gunshi as on the command line, and the value
- * is checked against `conflicts`. A required flag still has to be given on the command line,
- * because gunshi checks it before plugins run, and the command hooks see the values before the
- * variables fill them.
+ * A flag marked with {@link withEnv} that is not given on the command line takes the value of its
+ * variable. As in usage, a boolean is true for `1`, `true`, `True`, or `TRUE` and false otherwise;
+ * any other type is parsed and validated by gunshi as on the command line, and the value is checked
+ * against `conflicts`. A required flag still has to be given on the command line, because gunshi
+ * checks it before plugins run, and the command hooks see the values before the variables fill
+ * them.
  *
  * @returns A defined plugin that fills flags from environment variables
  */
-export default function env(): PluginWithExtension<EnvExtension> {
+export default function env(): PluginWithoutExtension {
   return plugin({
     id: pluginId,
     name: "env",
-    extension: (ctx): EnvExtension => {
-      const cli = ctx.env.name;
-      if (!cli) throw new Error("The env plugin names variables after the CLI; give cli() a name");
-      return { name: (key) => `${snake(cli)}_${snake(key)}` };
-    },
     setup(ctx) {
       ctx.decorateCommand((run) => async (c) => {
-        const { name } = c.extensions[pluginId];
         const values: Record<string, unknown> = { ...c.values };
-        const args: Record<string, ArgSchema> = c.args;
+        const args: Record<string, ArgSchema & { env?: string }> = c.args;
         const filled = new Set<string>();
         const errors: unknown[] = [];
         for (const [key, arg] of Object.entries(args)) {
-          const builtin = BUILTINS.has(key) && c.env.globalOptions?.has(key);
-          if (arg.type === "positional" || builtin || c.explicit[key]) continue;
-          const raw = process.env[name(key)];
+          if (arg.env === undefined || c.explicit[key]) continue;
+          const raw = process.env[arg.env];
           if (raw === undefined) continue;
           const parsed = fromEnv(key, arg, raw, c.toKebab);
           if (parsed.error) {

@@ -44,6 +44,7 @@
     "typecheck:deno": "deno check src/index.ts"
   },
   "devDependencies": {
+    "@h3y6e/gunshi-plugin-env": "workspace:*",
     "gunshi": "1.0.0-rc.1",
     "publint": "0.3.25",
     "tsdown": "0.23.0"

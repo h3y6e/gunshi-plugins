@@ -3,6 +3,7 @@ import { mkdtempSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 
+import env, { withEnv } from "@h3y6e/gunshi-plugin-env";
 import { cli, define, lazy } from "gunshi";
 import { plugin } from "gunshi/plugin";
 import { afterAll, afterEach, beforeAll, describe, expect, test, vi } from "vitest";
@@ -150,7 +151,7 @@ describe("spec", () => {
         flag "--mode <mode>" help="Sync mode" { choices "fast" "safe" }
         flag "--tag <tag>" help="Tags to sync" var=#true
         flag "--color" help="Colorize output" default=#true bool_value=#true negate="--no-color"
-        flag "--out <out>" help="Output file" { conflicts "--stdout" "--dry-run" }
+        flag "--out <FILE>" help="Output file" { conflicts "--stdout" "--dry-run" }
         flag "--stdout" help="Write to stdout" bool_value=#true
         flag "--trace" hide=#true bool_value=#true
         arg "[_]..." hide=#true
@@ -169,7 +170,7 @@ describe("spec", () => {
         arg "[_]..." hide=#true
         arg "[__]..." hide=#true double_dash="required"
       }
-      cmd "usage" help="Print the usage spec" hide=#true {
+      cmd "usage" help="Print the usage spec" effect="read" hide=#true {
         flag "-h --help" help="Display this help message" action="help" builtin=#true
         flag "-v --version" help="Display this version" action="version" builtin=#true
         arg "[_]..." hide=#true
@@ -245,30 +246,23 @@ describe("spec", () => {
     expect(kdl).not.toContain('cmd "root"');
   });
 
-  test("when the env plugin is in plugins, the spec names the variable of each flag it can fill", async () => {
+  test("when a flag with a variable is required, the spec leaves the variable out because gunshi checks the command line first", async () => {
     // Arrange
     const app = define({
       name: "app",
       args: {
-        loud: { type: "boolean" },
-        token: { type: "string", required: true },
-        target: { type: "positional", required: false },
+        loud: withEnv({ type: "boolean" }, "APP_LOUD"),
+        token: withEnv({ type: "string", required: true }, "APP_TOKEN"),
       },
       run: () => {},
     });
-    const env = plugin({
-      id: "h3y6e:env",
-      extension: () => ({ name: (key: string) => `APP_${key.toUpperCase()}` }),
-    });
 
     // Act
-    const kdl = await generate(app, { name: "app", plugins: [env] });
+    const kdl = await generate(app, { name: "app", plugins: [env()] });
 
     // Assert
     expect(kdl).toContain('flag "--loud" env="APP_LOUD" bool_value=#true');
-    expect(kdl).toContain('flag "--token <token>" required=#true');
-    expect(kdl).toContain('arg "[target]"\n');
-    expect(kdl).toContain('flag "-h --help" help="Display this help message" action="help"');
+    expect(kdl).toContain('flag "--token <token>" required=#true\n');
   });
 
   test("when only a plugin adds a command, gunshi falls back to the entry and the spec keeps the entry's positionals", async () => {

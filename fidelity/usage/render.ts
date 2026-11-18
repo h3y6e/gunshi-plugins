@@ -2,8 +2,8 @@ import { readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 
 import { vocabulary } from "./coverage/data.ts";
-import { baseline, mapping, samples } from "./coverage/mapping.ts";
-import type { Mapping } from "./coverage/mapping.ts";
+import { baseline, mapping, pluginSamples, samples } from "./coverage/mapping.ts";
+import type { Mapping, Sample } from "./coverage/mapping.ts";
 
 function fill(path: string, blocks: Record<string, string>) {
   let text = readFileSync(path, "utf8");
@@ -19,9 +19,27 @@ const code = (s: string) => `\`${s}\``;
 const source = `https://github.com/jdx/usage/blob/${vocabulary.commit}`;
 
 const base = await baseline();
-const mapped: [string, Mapping][] = [];
-for (const [name, sample] of Object.entries(samples)) mapped.push([name, await mapping(sample)]);
-const carried = new Set([...base, ...mapped.flatMap(([, m]) => m.keys)]);
+async function mappings(of: Record<string, Sample>): Promise<[string, Mapping][]> {
+  const mapped: [string, Mapping][] = [];
+  for (const [name, sample] of Object.entries(of)) mapped.push([name, await mapping(sample)]);
+  return mapped;
+}
+
+function table(mapped: [string, Mapping][]): string {
+  return [
+    `| Property | Key |`,
+    "| --- | --- |",
+    ...mapped.map(([name, m]) => {
+      const keys =
+        m.keys.length > 0 ? m.keys.map(code).join(", ") : m.spelling ? "spelling only" : "—";
+      return `| ${code(name)} | ${keys} |`;
+    }),
+  ].join("\n");
+}
+
+const mapped = await mappings(samples);
+const added = await mappings(pluginSamples);
+const carried = new Set([...base, ...[...mapped, ...added].flatMap(([, m]) => m.keys)]);
 const count = vocabulary.keys.filter((k) => carried.has(k)).length;
 const total = vocabulary.keys.length;
 
@@ -30,15 +48,8 @@ const corpus: { vectors: { argv: string[]; doc: string; gunshi?: { diverges: str
 
 fill(join(import.meta.dirname, "coverage/README.md"), {
   base: base.map(code).join(", "),
-  properties: [
-    `| Property | Key |`,
-    "| --- | --- |",
-    ...mapped.map(([name, m]) => {
-      const keys =
-        m.keys.length > 0 ? m.keys.map(code).join(", ") : m.spelling ? "spelling only" : "—";
-      return `| ${code(name)} | ${keys} |`;
-    }),
-  ].join("\n"),
+  properties: table(mapped),
+  plugin: table(added),
   keys: [
     `[usage ${vocabulary.usage}](${source}/lib/src/spec) · [cobra_usage](${source}/integrations/cobra/kdl.go)`,
     "",

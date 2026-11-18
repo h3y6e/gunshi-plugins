@@ -1,16 +1,12 @@
-import env, { pluginId } from "@h3y6e/gunshi-plugin-env";
-import type { EnvExtension, PluginId } from "@h3y6e/gunshi-plugin-env";
-import { cli, defineWithTypes } from "gunshi";
+import env, { withEnv } from "@h3y6e/gunshi-plugin-env";
+import { cli, define } from "gunshi";
 
-const command = defineWithTypes<{ extensions: Record<PluginId, EnvExtension> }>()({
+const command = define({
   name: "greet",
   args: {
-    loud: { type: "boolean", description: "Shout" },
+    loud: withEnv({ type: "boolean", description: "Shout" }, "GREET_LOUD"),
   },
-  run: (ctx) => {
-    if (ctx.values.loud) return console.log("HELLO!");
-    console.log(`hello (${ctx.extensions[pluginId].name("loud")}=1 to shout)`);
-  },
+  run: (ctx) => console.log(ctx.values.loud ? "HELLO!" : "hello"),
 });
 
 await cli(process.argv.slice(2), command, { name: "greet", plugins: [env()] });

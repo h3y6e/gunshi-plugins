@@ -5,9 +5,10 @@
 
 import { plugin } from "gunshi/plugin";
 import type { PluginWithoutExtension } from "gunshi/plugin";
-import { isLazyCommand, resolveLazyCommand } from "gunshi/utils";
 
+import { withUsage } from "./meta.ts";
 import { specOf } from "./spec.ts";
+import type { UsageOptions } from "./spec.ts";
 
 /** The unique identifier of the usage plugin */
 export const pluginId = "h3y6e:usage" as const;
@@ -18,27 +19,27 @@ export type PluginId = typeof pluginId;
  *
  * Adds a hidden `usage` command that prints the usage KDL spec of the CLI.
  *
+ * @param options - How to write the spec
  * @returns A defined plugin that adds the `usage` command
  */
-export default function usage(): PluginWithoutExtension {
+export default function usage(options: UsageOptions = {}): PluginWithoutExtension {
   return plugin({
     id: pluginId,
     name: "usage",
     setup(ctx) {
-      ctx.addCommand("usage", {
-        name: "usage",
-        description: "Print the usage spec",
-        internal: true,
-        rendering: { header: null },
-        run: async (c) => {
-          const entry = c.env.entryCommand;
-          if (!entry) throw new Error("The usage command needs the entry command");
-          const loaded = isLazyCommand(entry)
-            ? await resolveLazyCommand(entry, c.env.name, true)
-            : entry;
-          console.log(await specOf(c, loaded));
-        },
-      });
+      ctx.addCommand(
+        "usage",
+        withUsage(
+          {
+            name: "usage",
+            description: options.description ?? "Print the usage spec",
+            internal: true,
+            rendering: { header: null },
+            run: async (c) => console.log(await specOf(c, options)),
+          },
+          { effect: "read" },
+        ),
+      );
     },
   });
 }

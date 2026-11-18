@@ -29,5 +29,8 @@
  * @author h3y6e
  */
 
+export { complete, withUsage } from "./meta.ts";
+export type { UsageMeta, UsageOutput } from "./meta.ts";
 export { default, pluginId } from "./plugin.ts";
 export type { PluginId } from "./plugin.ts";
+export type { UsageOptions } from "./spec.ts";

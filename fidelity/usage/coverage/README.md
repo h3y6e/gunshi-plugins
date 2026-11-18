@@ -10,7 +10,7 @@ Every spec also has:
 
 <!-- BEGIN base -->
 
-`arg.double_dash`, `arg.hide`, `cmd.arg`, `cmd.flag`, `cmd.help`, `cmd.hide`, `flag.action`, `flag.builtin`, `flag.help`, `spec.arg`, `spec.bin`, `spec.cmd`, `spec.disable_help`, `spec.disable_version_flag`, `spec.flag`, `spec.name`, `spec.subcommand_negates_reqs`
+`arg.double_dash`, `arg.hide`, `cmd.arg`, `cmd.effect`, `cmd.flag`, `cmd.help`, `cmd.hide`, `flag.action`, `flag.builtin`, `flag.help`, `spec.arg`, `spec.bin`, `spec.cmd`, `spec.disable_help`, `spec.disable_version_flag`, `spec.flag`, `spec.name`, `spec.subcommand_negates_reqs`
 <!-- END base -->
 
 <!-- BEGIN properties -->
@@ -21,7 +21,7 @@ Every spec also has:
 | `ArgSchema.short`                   | spelling only                                                                                                                              |
 | `ArgSchema.description`             | `arg.help`, `flag.help`                                                                                                                    |
 | `ArgSchema.hidden`                  | `arg.hide`, `flag.hide`                                                                                                                    |
-| `ArgSchema.metavar`                 | —                                                                                                                                          |
+| `ArgSchema.metavar`                 | spelling only                                                                                                                              |
 | `ArgSchema.multiple`                | `flag.var`                                                                                                                                 |
 | `ArgSchema.negatable`               | `flag.negate`                                                                                                                              |
 | `ArgSchema.parse`                   | —                                                                                                                                          |
@@ -55,12 +55,41 @@ Every spec also has:
 | `CliOptions.renderHeader`           | —                                                                                                                                          |
 | `CliOptions.renderValidationErrors` | —                                                                                                                                          |
 | `CliOptions.fallbackToEntry`        | `arg.hide`, `spec.arg`                                                                                                                     |
-| `CliOptions.plugins`                | `arg.double_dash`, `arg.hide`, `cmd.arg`, `cmd.flag`, `flag.action`, `flag.builtin`, `flag.env`, `flag.help`, `spec.cmd`, `spec.flag`      |
+| `CliOptions.plugins`                | `arg.double_dash`, `arg.hide`, `cmd.arg`, `cmd.flag`, `flag.action`, `flag.builtin`, `flag.help`, `spec.cmd`, `spec.flag`                  |
 | `CliOptions.onBeforeCommand`        | —                                                                                                                                          |
 | `CliOptions.onAfterCommand`         | —                                                                                                                                          |
 | `CliOptions.onErrorCommand`         | —                                                                                                                                          |
 
 <!-- END properties -->
+
+## Plugin metadata
+
+The same comparison for what the plugins add to gunshi's definitions: `withUsage`, `complete`, and the options of `usage()` from gunshi-plugin-usage, and `withEnv` from gunshi-plugin-env.
+
+<!-- BEGIN plugin -->
+
+| Property                       | Key                                                   |
+| ------------------------------ | ----------------------------------------------------- |
+| `UsageMeta.effect`             | `cmd.effect`                                          |
+| `UsageMeta.longDescription`    | `cmd.long_help`, `spec.long_about`                    |
+| `UsageMeta.subcommandRequired` | `cmd.subcommand_required`                             |
+| `UsageMeta.outputs`            | `cmd.output`, `spec.output`                           |
+| `UsageMeta.exitCodes`          | `cmd.exit_code`, `spec.exit_code`                     |
+| `UsageOutput.description`      | `output.help`                                         |
+| `UsageOutput.default`          | `output.default`                                      |
+| `UsageOutput.hidden`           | `output.hide`                                         |
+| `UsageOutput.mediaType`        | `output.media_type`                                   |
+| `UsageOutput.framing`          | `output.framing`                                      |
+| `UsageOutput.select`           | `output.select`                                       |
+| `UsageOutput.schema`           | `output.schema`                                       |
+| `UsageOptions.name`            | spelling only                                         |
+| `UsageOptions.description`     | spelling only                                         |
+| `UsageOptions.flagsets`        | `cmd.use`, `flagset.flag`, `spec.flagset`, `spec.use` |
+| `UsageOptions.declaredOnly`    | `flag.global`                                         |
+| `complete()`                   | `arg.complete`, `flag.complete`                       |
+| `withEnv()`                    | `flag.env`                                            |
+
+<!-- END plugin -->
 
 ## usage keys
 
@@ -70,12 +99,12 @@ Keys the usage parser accepts, as `node.key` (`spec` is the top level). The cobr
 
 [usage 6.12.1](https://github.com/jdx/usage/blob/4de083709ddf5f54ecf5f85cc1c21e7fd0388228/lib/src/spec) · [cobra_usage](https://github.com/jdx/usage/blob/4de083709ddf5f54ecf5f85cc1c21e7fd0388228/integrations/cobra/kdl.go)
 
-| Key                                    | gunshi-plugin-usage (35/306) | cobra_usage (43/306) |
+| Key                                    | gunshi-plugin-usage (57/306) | cobra_usage (43/306) |
 | -------------------------------------- | ---------------------------- | -------------------- |
 | `arg.allow_negative_numbers`           | —                            | —                    |
 | `arg.available_if`                     | —                            | —                    |
 | `arg.choices`                          | —                            | carried              |
-| `arg.complete`                         | —                            | —                    |
+| `arg.complete`                         | carried                      | —                    |
 | `arg.conflicts`                        | —                            | —                    |
 | `arg.default`                          | carried                      | carried              |
 | `arg.delimiter`                        | —                            | —                    |
@@ -154,12 +183,12 @@ Keys the usage parser accepts, as `node.key` (`spec` is the top level). The cobr
 | `cmd.disable_version_flag`             | —                            | —                    |
 | `cmd.display_order`                    | —                            | —                    |
 | `cmd.dont_delimit_trailing_values`     | —                            | —                    |
-| `cmd.effect`                           | —                            | —                    |
+| `cmd.effect`                           | carried                      | —                    |
 | `cmd.example`                          | carried                      | carried              |
 | `cmd.example.header`                   | —                            | carried              |
 | `cmd.example.help`                     | —                            | carried              |
 | `cmd.example.lang`                     | —                            | carried              |
-| `cmd.exit_code`                        | —                            | —                    |
+| `cmd.exit_code`                        | carried                      | —                    |
 | `cmd.external_subcommand`              | —                            | —                    |
 | `cmd.flag`                             | carried                      | carried              |
 | `cmd.flatten_help`                     | —                            | —                    |
@@ -171,22 +200,22 @@ Keys the usage parser accepts, as `node.key` (`spec` is the top level). The cobr
 | `cmd.help_long`                        | —                            | —                    |
 | `cmd.help_md`                          | —                            | —                    |
 | `cmd.hide`                             | carried                      | carried              |
-| `cmd.long_help`                        | —                            | carried              |
+| `cmd.long_help`                        | carried                      | carried              |
 | `cmd.max_term_width`                   | —                            | —                    |
 | `cmd.mount`                            | —                            | —                    |
 | `cmd.next_line_help`                   | —                            | —                    |
-| `cmd.output`                           | —                            | —                    |
+| `cmd.output`                           | carried                      | —                    |
 | `cmd.restart_token`                    | —                            | —                    |
 | `cmd.select`                           | —                            | —                    |
 | `cmd.subcommand_help_heading`          | —                            | —                    |
 | `cmd.subcommand_negates_reqs`          | carried                      | —                    |
 | `cmd.subcommand_precedence_over_arg`   | —                            | —                    |
-| `cmd.subcommand_required`              | —                            | carried              |
+| `cmd.subcommand_required`              | carried                      | carried              |
 | `cmd.subcommand_value_name`            | —                            | —                    |
 | `cmd.surface`                          | —                            | —                    |
 | `cmd.term_width`                       | —                            | —                    |
 | `cmd.unknown_flags`                    | —                            | —                    |
-| `cmd.use`                              | —                            | —                    |
+| `cmd.use`                              | carried                      | —                    |
 | `complete.delegate`                    | —                            | —                    |
 | `complete.descriptions`                | —                            | —                    |
 | `complete.run`                         | —                            | —                    |
@@ -235,7 +264,7 @@ Keys the usage parser accepts, as `node.key` (`spec` is the top level). The cobr
 | `flag.bool_value`                      | carried                      | —                    |
 | `flag.builtin`                         | carried                      | —                    |
 | `flag.choices`                         | carried                      | carried              |
-| `flag.complete`                        | —                            | —                    |
+| `flag.complete`                        | carried                      | —                    |
 | `flag.conflicts`                       | carried                      | —                    |
 | `flag.count`                           | —                            | carried              |
 | `flag.default`                         | carried                      | carried              |
@@ -251,7 +280,7 @@ Keys the usage parser accepts, as `node.key` (`spec` is the top level). The cobr
 | `flag.env`                             | carried                      | —                    |
 | `flag.env_fallback`                    | —                            | —                    |
 | `flag.exclusive`                       | —                            | —                    |
-| `flag.global`                          | —                            | carried              |
+| `flag.global`                          | carried                      | carried              |
 | `flag.help`                            | carried                      | carried              |
 | `flag.help_heading`                    | —                            | —                    |
 | `flag.help_long`                       | —                            | —                    |
@@ -284,7 +313,7 @@ Keys the usage parser accepts, as `node.key` (`spec` is the top level). The cobr
 | `flag.var_min`                         | —                            | —                    |
 | `flag.warning`                         | —                            | —                    |
 | `flagset.arg`                          | —                            | —                    |
-| `flagset.flag`                         | —                            | —                    |
+| `flagset.flag`                         | carried                      | —                    |
 | `flagset.use`                          | —                            | —                    |
 | `group.flag`                           | —                            | —                    |
 | `group.multiple`                       | —                            | —                    |
@@ -292,13 +321,13 @@ Keys the usage parser accepts, as `node.key` (`spec` is the top level). The cobr
 | `mount.overrides_default`              | —                            | —                    |
 | `mount.run`                            | —                            | —                    |
 | `mount.synopsis`                       | —                            | —                    |
-| `output.default`                       | —                            | —                    |
-| `output.framing`                       | —                            | —                    |
-| `output.help`                          | —                            | —                    |
-| `output.hide`                          | —                            | —                    |
-| `output.media_type`                    | —                            | —                    |
-| `output.schema`                        | —                            | —                    |
-| `output.select`                        | —                            | —                    |
+| `output.default`                       | carried                      | —                    |
+| `output.framing`                       | carried                      | —                    |
+| `output.help`                          | carried                      | —                    |
+| `output.hide`                          | carried                      | —                    |
+| `output.media_type`                    | carried                      | —                    |
+| `output.schema`                        | carried                      | —                    |
+| `output.select`                        | carried                      | —                    |
 | `spec.about`                           | carried                      | carried              |
 | `spec.about_long`                      | —                            | —                    |
 | `spec.about_md`                        | —                            | —                    |
@@ -336,10 +365,10 @@ Keys the usage parser accepts, as `node.key` (`spec` is the top level). The cobr
 | `spec.example.header`                  | —                            | carried              |
 | `spec.example.help`                    | —                            | carried              |
 | `spec.example.lang`                    | —                            | carried              |
-| `spec.exit_code`                       | —                            | —                    |
+| `spec.exit_code`                       | carried                      | —                    |
 | `spec.external_subcommand`             | —                            | —                    |
 | `spec.flag`                            | carried                      | carried              |
-| `spec.flagset`                         | —                            | —                    |
+| `spec.flagset`                         | carried                      | —                    |
 | `spec.flatten_help`                    | —                            | —                    |
 | `spec.group`                           | —                            | —                    |
 | `spec.heading`                         | —                            | —                    |
@@ -349,7 +378,7 @@ Keys the usage parser accepts, as `node.key` (`spec` is the top level). The cobr
 | `spec.license`                         | —                            | —                    |
 | `spec.logo`                            | —                            | —                    |
 | `spec.logo.style`                      | —                            | —                    |
-| `spec.long_about`                      | —                            | carried              |
+| `spec.long_about`                      | carried                      | carried              |
 | `spec.long_version`                    | —                            | —                    |
 | `spec.max_term_width`                  | —                            | —                    |
 | `spec.min_usage_version`               | —                            | —                    |
@@ -357,7 +386,7 @@ Keys the usage parser accepts, as `node.key` (`spec` is the top level). The cobr
 | `spec.multicall`                       | —                            | —                    |
 | `spec.name`                            | carried                      | carried              |
 | `spec.next_line_help`                  | —                            | —                    |
-| `spec.output`                          | —                            | —                    |
+| `spec.output`                          | carried                      | —                    |
 | `spec.repository`                      | —                            | —                    |
 | `spec.select`                          | —                            | —                    |
 | `spec.source_code_link_template`       | —                            | —                    |
@@ -370,7 +399,7 @@ Keys the usage parser accepts, as `node.key` (`spec` is the top level). The cobr
 | `spec.term_width`                      | —                            | —                    |
 | `spec.unknown_flags`                   | carried                      | —                    |
 | `spec.usage`                           | —                            | carried              |
-| `spec.use`                             | —                            | —                    |
+| `spec.use`                             | carried                      | —                    |
 | `spec.version`                         | carried                      | carried              |
 | `spec.view`                            | —                            | —                    |
 | `view.bin`                             | —                            | —                    |
