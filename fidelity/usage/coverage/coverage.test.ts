@@ -39,16 +39,12 @@ describe("fidelity coverage", () => {
 
     // Act
     const declared = properties(
-      [join(src, "meta.ts"), join(src, "spec.ts")],
-      ["UsageMeta", "UsageOutput", "UsageOptions"],
+      [join(src, "meta.ts"), join(src, "spec.ts"), join(src, "../../env/src/plugin.ts")],
+      ["UsageMeta", "UsageOutput", "UsageOptions", "ArgSchema"],
     );
 
     // Assert
-    expect(declared.sort()).toEqual(
-      Object.keys(pluginSamples)
-        .filter((k) => !k.endsWith("()"))
-        .sort(),
-    );
+    expect(declared.sort()).toEqual(Object.keys(pluginSamples).sort());
   });
 
   test("when the samples are generated, every key they produce is in the usage vocabulary", async () => {

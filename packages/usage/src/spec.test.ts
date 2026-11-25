@@ -3,7 +3,7 @@ import { mkdtempSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 
-import env, { withEnv } from "@h3y6e/gunshi-plugin-env";
+import env from "@h3y6e/gunshi-plugin-env";
 import { cli, define, lazy } from "gunshi";
 import { plugin } from "gunshi/plugin";
 import { afterAll, afterEach, beforeAll, describe, expect, test, vi } from "vitest";
@@ -75,7 +75,7 @@ const options = {
 
 async function runApp(argv: string[]): Promise<string> {
   const log = vi.spyOn(console, "log").mockImplementation(() => {});
-  await cli(argv, entry, options);
+  await cli(argv, entry, { ...options, renderValidationErrors: null });
   return log.mock.calls.map((call) => call.join(" ")).join("\n");
 }
 
@@ -251,8 +251,8 @@ describe("spec", () => {
     const app = define({
       name: "app",
       args: {
-        loud: withEnv({ type: "boolean" }, "APP_LOUD"),
-        token: withEnv({ type: "string", required: true }, "APP_TOKEN"),
+        loud: { type: "boolean", env: "APP_LOUD" },
+        token: { type: "string", required: true, env: "APP_TOKEN" },
       },
       run: () => {},
     });

@@ -42,12 +42,12 @@
     "prepack": "aubr build"
   },
   "devDependencies": {
-    "gunshi": "1.0.0-rc.1",
+    "gunshi": "1.0.0-rc.13",
     "publint": "0.3.25",
     "tsdown": "0.23.0"
   },
   "peerDependencies": {
-    "gunshi": "^1.0.0-rc.1"
+    "gunshi": "^1.0.0-rc.13"
   },
   "engines": {
     "node": ">= 22.12"

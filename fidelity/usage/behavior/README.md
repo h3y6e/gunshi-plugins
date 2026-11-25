@@ -15,5 +15,6 @@ Whether a usage CLI reading the spec parses a command line as gunshi does. `mise
 | `-a=foo`           | A short flag takes no value after `=`.                                           | Binds the value after `=`.                                    |
 | `--alpha -3`       | A value-taking flag takes a following word that starts with `-`.                 | Reads that word as a flag, so the value is missing.           |
 | `--jobs nope`      | A flag value is any string; the spec has no type for flags.                      | Rejects a value that is not a number.                         |
+| `--alpha -b`       | A value-taking flag followed by an undeclared flag is an unknown flag.           | Reports only that the value is missing.                       |
 
 <!-- END corpus -->

@@ -12,7 +12,7 @@ Use the spec to generate shell completions, Markdown documentation, man pages, a
 npm install @h3y6e/gunshi-plugin-usage
 ```
 
-Requires gunshi 1.x.
+Requires gunshi 1.0.0-rc.13 or later.
 
 ## Usage
 
@@ -52,14 +52,14 @@ usage generate completion zsh greet --usage-cmd "greet usage" --install
 
 ### Environment variables
 
-With [`@h3y6e/gunshi-plugin-env`](https://npmjs.com/package/@h3y6e/gunshi-plugin-env), a flag marked with `withEnv` names its variable in the spec.
+With [`@h3y6e/gunshi-plugin-env`](https://npmjs.com/package/@h3y6e/gunshi-plugin-env), a flag with `env` names its variable in the spec.
 
 ### Metadata
 
 What gunshi does not know goes on the definitions:
 
 ```ts
-import usage, { complete, withUsage } from "@h3y6e/gunshi-plugin-usage";
+import usage, { withUsage } from "@h3y6e/gunshi-plugin-usage";
 import { define } from "gunshi";
 
 const write = { dryRun: { type: "boolean", description: "Change nothing" } } as const;
@@ -69,7 +69,7 @@ const add = withUsage(
     name: "add",
     toKebab: true,
     args: {
-      file: complete({ type: "positional" }, "file:json"),
+      file: { type: "positional", complete: "file:json" },
       budget: { type: "number", metavar: "tokens" },
       source: { type: "string", choices: ["cli", "chat"] },
       ...write,
@@ -88,7 +88,7 @@ usage({ name: "App", description: "Print the spec", flagsets: { write }, declare
 ```
 
 - `withUsage(command, meta)` gives a command `effect`, `long_help`, `subcommand_required`, `output`, and `exit_code`. On the entry command, `longDescription`, `outputs`, and `exitCodes` apply to the whole CLI.
-- `complete(schema, type)` sets how shells complete a value.
+- `complete` on an argument sets how shells complete its value.
 - `metavar` names a flag's value.
 - `choices` on a type other than `enum` become `choices strict=#false`, since gunshi does not check them.
 - `flagsets` in the options turn the flags of a set into `use` in every command whose `args` hold all of the set's schemas, as spread from the same object.
@@ -96,8 +96,9 @@ usage({ name: "App", description: "Print the spec", flagsets: { write }, declare
 
 ## Limitations
 
-- gunshi and usage read a few command lines differently, and the spec cannot express the difference. For example, with `-a` taking a value and `-d` a boolean, usage reads `-ad p` as `-a p -d`, while gunshi fails because `-a` has no value.
+- gunshi and usage read a few command lines differently, and the spec cannot express the difference. For example, with `-a` taking a value and `-d` a boolean, usage reads `-ad p` as `-a p -d`, while gunshi fails because `-a` has no value. When a flag that takes a value is followed by an undeclared flag, gunshi reports the missing value and usage the unknown flag.
 - Without `declaredOnly`, the spec assumes gunshi's `strict` mode. Without `strict`, gunshi drops an unknown flag together with the word after it, which the spec cannot express.
+- The spec does not express `aliases`, `deprecated`, `passthrough`, or `strictPositionals` yet: an alias is missing from completions, a passthrough command still gets `unknown_flags "error"`, and extra positionals stay accepted under `strictPositionals`.
 - Examples given as a function are left out of the spec. The function needs the context of its own command, which the `usage` command does not have.
 
 ## License

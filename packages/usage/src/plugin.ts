@@ -3,6 +3,7 @@
  * @author h3y6e
  */
 
+import { define } from "gunshi";
 import { plugin } from "gunshi/plugin";
 import type { PluginWithoutExtension } from "gunshi/plugin";
 
@@ -30,13 +31,13 @@ export default function usage(options: UsageOptions = {}): PluginWithoutExtensio
       ctx.addCommand(
         "usage",
         withUsage(
-          {
+          define({
             name: "usage",
             description: options.description ?? "Print the usage spec",
             internal: true,
             rendering: { header: null },
             run: async (c) => console.log(await specOf(c, options)),
-          },
+          }),
           { effect: "read" },
         ),
       );

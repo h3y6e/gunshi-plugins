@@ -29,7 +29,7 @@ export interface UsageOptions {
 
 type AnyCommand = Command | LazyCommand;
 
-type Schema = ArgSchema & { env?: string; complete?: string };
+type Schema = ArgSchema & { env?: string };
 
 type Globals = [string, Schema][];
 
