@@ -1,7 +1,6 @@
 [tools]
 aube = "2.8.1"
 bun = "1.4.2"
-deno = "2.9.8"
 node = "26.12.1"
 usage = "6.12.1"
 
@@ -22,12 +21,6 @@ run = "aubr test"
 depends = ["build"]
 run = "aubr e2e"
 
-[tasks."typecheck:deno"]
-run = "aubr -r --if-present typecheck:deno"
-
-[tasks."lint:jsr"]
-run = "aubr -r --if-present lint:jsr"
-
 [tasks."fidelity:vocabulary"]
 run = "node fidelity/usage/coverage/extract.ts"
 
@@ -40,4 +33,4 @@ depends = ["build"]
 run = "aubr fidelity"
 
 [tasks.check]
-depends = ["fmt:check", "lint", "test", "fidelity", "e2e", "typecheck:deno", "lint:jsr"]
+depends = ["fmt:check", "lint", "test", "fidelity", "e2e"]

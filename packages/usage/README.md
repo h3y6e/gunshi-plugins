@@ -1,7 +1,6 @@
 # @h3y6e/gunshi-plugin-usage
 
 [![npm](https://img.shields.io/npm/v/@h3y6e/gunshi-plugin-usage?style=flat)](https://npmjs.com/package/@h3y6e/gunshi-plugin-usage)
-[![JSR](https://jsr.io/badges/@h3y6e/gunshi-plugin-usage)](https://jsr.io/@h3y6e/gunshi-plugin-usage)
 
 > Export a [usage](https://usage.jdx.dev) spec from a [gunshi](https://gunshi.dev) CLI.
 
@@ -10,11 +9,7 @@ Use the spec to generate shell completions, Markdown documentation, man pages, a
 ## Installation
 
 ```sh
-# npm
 npm install @h3y6e/gunshi-plugin-usage
-
-# deno
-deno add jsr:@h3y6e/gunshi-plugin-usage
 ```
 
 Requires gunshi 1.x.
@@ -57,7 +52,7 @@ usage generate completion zsh greet --usage-cmd "greet usage" --install
 
 ### Environment variables
 
-With [`@h3y6e/gunshi-plugin-env`](https://jsr.io/@h3y6e/gunshi-plugin-env), a flag marked with `withEnv` names its variable in the spec.
+With [`@h3y6e/gunshi-plugin-env`](https://npmjs.com/package/@h3y6e/gunshi-plugin-env), a flag marked with `withEnv` names its variable in the spec.
 
 ### Metadata
 
@@ -104,10 +99,6 @@ usage({ name: "App", description: "Print the spec", flagsets: { write }, declare
 - gunshi and usage read a few command lines differently, and the spec cannot express the difference. For example, with `-a` taking a value and `-d` a boolean, usage reads `-ad p` as `-a p -d`, while gunshi fails because `-a` has no value.
 - Without `declaredOnly`, the spec assumes gunshi's `strict` mode. Without `strict`, gunshi drops an unknown flag together with the word after it, which the spec cannot express.
 - Examples given as a function are left out of the spec. The function needs the context of its own command, which the `usage` command does not have.
-
-## API References
-
-[JSR](https://jsr.io/@h3y6e/gunshi-plugin-usage/doc)
 
 ## License
 

@@ -39,9 +39,7 @@
   },
   "scripts": {
     "build": "tsdown",
-    "lint:jsr": "deno publish --dry-run --allow-dirty",
-    "prepack": "aubr build",
-    "typecheck:deno": "deno check src/index.ts"
+    "prepack": "aubr build"
   },
   "devDependencies": {
     "@h3y6e/gunshi-plugin-env": "workspace:*",

@@ -1,18 +1,13 @@
 # @h3y6e/gunshi-plugin-env
 
 [![npm](https://img.shields.io/npm/v/@h3y6e/gunshi-plugin-env?style=flat)](https://npmjs.com/package/@h3y6e/gunshi-plugin-env)
-[![JSR](https://jsr.io/badges/@h3y6e/gunshi-plugin-env)](https://jsr.io/@h3y6e/gunshi-plugin-env)
 
 > Fill [gunshi](https://gunshi.dev) flags from environment variables.
 
 ## Installation
 
 ```sh
-# npm
 npm install @h3y6e/gunshi-plugin-env
-
-# deno
-deno add jsr:@h3y6e/gunshi-plugin-env
 ```
 
 Requires gunshi 1.x.
@@ -57,10 +52,6 @@ This plugin fills the values just before the command's `run` and puts them only 
 - A `required` flag has to be given on the command line; a variable does not satisfy it. Leave `required` off flags meant to come from variables.
 - `onBeforeCommand` and `onAfterCommand` see the values before the variables fill them. Read the filled values in the command's `run`.
 - Of other plugins, only the decorators of those listed after env in `plugins` see the filled values. Extensions see only the values before the variables fill them.
-
-## API References
-
-[JSR](https://jsr.io/@h3y6e/gunshi-plugin-env/doc)
 
 ## License
 

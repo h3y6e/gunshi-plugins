@@ -86,22 +86,3 @@ jobs:
           name: ${{ inputs.package }}
           path: ${{ runner.temp }}/dist
       - run: npm stage publish "$RUNNER_TEMP"/dist/*.tgz --access public --provenance --ignore-scripts
-
-  publish-jsr:
-    needs: tagpr
-    if: needs.tagpr.outputs.tag != ''
-    runs-on: ubuntu-latest
-    timeout-minutes: 10
-    permissions:
-      contents: read
-      id-token: write
-    steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-        with:
-          ref: ${{ needs.tagpr.outputs.tag }}
-          persist-credentials: false
-      - uses: jdx/mise-action@2d8d4cafcbd33be2ea37d2b6f5ad595363d1f1ca # v5.1.1
-        with:
-          install_args: deno
-      - working-directory: packages/${{ inputs.package }}
-        run: deno publish

@@ -2,5 +2,5 @@
 	vPrefix = true
 	releaseBranch = main
 	tagPrefix = packages/env
-	versionFile = packages/env/package.json,packages/env/jsr.json
+	versionFile = packages/env/package.json
 	changelog = false
