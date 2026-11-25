@@ -2,9 +2,9 @@ import { mkdtempSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 
-import { withEnv } from "@h3y6e/gunshi-plugin-env";
 import fc from "fast-check";
 import type { ArgSchema } from "gunshi";
+import { kebabnize } from "gunshi/utils";
 import { afterAll, expect, test } from "vitest";
 
 import { same, viaGunshi, viaUsage } from "./runner.ts";
@@ -42,8 +42,8 @@ const flag = (name: (typeof names)[number]) =>
         ...(f.short && { short: shorts[name] }),
         ...(f.conflicts && { conflicts: f.conflicts }),
       };
-      const read = <S extends ArgSchema & { type: "boolean" | "string" | "enum" }>(schema: S) =>
-        f.env ? withEnv(schema, variables[name] ?? "") : schema;
+      const read = <S extends ArgSchema>(schema: S): S =>
+        f.env ? { ...schema, env: variables[name] ?? "" } : schema;
       if (f.type === "boolean") return read({ type: "boolean", negatable: f.negatable, ...common });
       const value =
         f.type === "enum"
@@ -135,7 +135,31 @@ test("when gunshi and usage explain read the same random definition, argv, and e
     const grouped = c.argv.some(
       (w) => /^-[a-z]{2,}$/.test(w) && w.slice(1, -1).split("").some(valued),
     );
-    fc.pre(!unreachable && !grouped);
+    const at = c.argv[0] === "sub" && c.command.subCommands ? c.command.subCommands.sub : c.command;
+    const declared = new Set(["--help", "-h", "--version", "-v"]);
+    for (const [key, arg] of Object.entries(at.args)) {
+      const name = at.toKebab || arg.toKebab ? kebabnize(key) : key;
+      declared.add(`--${name}`);
+      if (arg.negatable) declared.add(`--no-${name}`);
+      if (arg.short) declared.add(`-${arg.short}`);
+    }
+    const undeclared = (w: string) =>
+      w.startsWith("--")
+        ? !declared.has(w.split("=")[0] ?? w)
+        : (w.slice(1).split("=")[0] ?? "").split("").some((s) => !declared.has(`-${s}`));
+    const takesValue = (w: string) => {
+      const last = /^-[a-z]+$/.test(w) ? `-${w.at(-1)}` : w;
+      return Object.entries(at.args).some(
+        ([key, arg]) =>
+          arg.type !== "boolean" &&
+          arg.type !== "positional" &&
+          [`--${at.toKebab || arg.toKebab ? kebabnize(key) : key}`, `-${arg.short}`].includes(last),
+      );
+    };
+    const valueThenUndeclared = c.argv.some(
+      (w, i) => takesValue(w) && /^-./.test(c.argv[i + 1] ?? "") && undeclared(c.argv[i + 1] ?? ""),
+    );
+    fc.pre(!unreachable && !grouped && !valueThenUndeclared);
 
     // Act
     const [byUsage, byGunshi] = [await viaUsage(c, spec), await viaGunshi(c)];

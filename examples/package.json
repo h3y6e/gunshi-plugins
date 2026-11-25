@@ -5,6 +5,6 @@
   "dependencies": {
     "@h3y6e/gunshi-plugin-env": "workspace:*",
     "@h3y6e/gunshi-plugin-usage": "workspace:*",
-    "gunshi": "^1.0.0-rc.1"
+    "gunshi": "^1.0.0-rc.13"
   }
 }

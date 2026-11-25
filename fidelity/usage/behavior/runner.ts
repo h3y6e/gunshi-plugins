@@ -167,7 +167,8 @@ export async function viaGunshi(c: Case): Promise<Outcome> {
   try {
     await cli(c.argv, entry, { ...options, plugins: [...options.plugins, usage()] });
   } catch (error) {
-    const codes: string[] = (error as AggregateError).errors.map((e: { code: string }) => e.code);
+    if (!(error instanceof AggregateError)) throw error;
+    const codes: string[] = error.errors.map((e: { code: string }) => e.code);
     return { errors: codes.map((code) => gunshiCodes[code] ?? code) };
   } finally {
     vi.unstubAllEnvs();

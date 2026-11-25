@@ -1,10 +1,10 @@
-import env, { withEnv } from "@h3y6e/gunshi-plugin-env";
+import env from "@h3y6e/gunshi-plugin-env";
 import { cli, define } from "gunshi";
 
 const command = define({
   name: "greet",
   args: {
-    loud: withEnv({ type: "boolean", description: "Shout" }, "GREET_LOUD"),
+    loud: { type: "boolean", description: "Shout", env: "GREET_LOUD" },
   },
   run: (ctx) => console.log(ctx.values.loud ? "HELLO!" : "hello"),
 });

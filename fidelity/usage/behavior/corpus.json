@@ -158,6 +158,24 @@
       "gunshi": {
         "diverges": "Rejects a value that is not a number."
       }
+    },
+    {
+      "id": "value-then-undeclared-flag",
+      "doc": "A value-taking flag followed by an undeclared flag is an unknown flag.",
+      "command": {
+        "args": {
+          "alpha": {
+            "type": "string"
+          }
+        }
+      },
+      "argv": ["--alpha", "-b"],
+      "expect": {
+        "error": "unknown_flag"
+      },
+      "gunshi": {
+        "diverges": "Reports only that the value is missing."
+      }
     }
   ]
 }

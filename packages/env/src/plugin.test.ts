@@ -1,8 +1,8 @@
-import { cli, define } from "gunshi";
+import { cli, define, jsonArgs } from "gunshi";
 import { plugin } from "gunshi/plugin";
 import { afterEach, describe, expect, test, vi } from "vitest";
 
-import env, { withEnv } from "./index.ts";
+import env from "./index.ts";
 
 afterEach(() => {
   vi.restoreAllMocks();
@@ -12,14 +12,14 @@ afterEach(() => {
 const command = define({
   name: "greet",
   args: {
-    loud: withEnv({ type: "boolean" }, "GREET_LOUD"),
-    dryRun: withEnv({ type: "boolean" }, "GREET_DRY_RUN"),
-    times: withEnv({ type: "number" }, "GREET_TIMES"),
-    mode: withEnv({ type: "enum", choices: ["fast", "safe"] }, "GREET_MODE"),
-    tag: withEnv({ type: "string", multiple: true }, "GREET_TAG"),
-    from: withEnv({ type: "string", conflicts: "to" }, "GREET_FROM"),
+    loud: { type: "boolean", env: "GREET_LOUD" },
+    dryRun: { type: "boolean", env: "GREET_DRY_RUN" },
+    times: { type: "number", env: "GREET_TIMES" },
+    mode: { type: "enum", choices: ["fast", "safe"], env: "GREET_MODE" },
+    tag: { type: "string", multiple: true, env: "GREET_TAG" },
+    from: { type: "string", conflicts: "to", env: "GREET_FROM" },
     to: { type: "string" },
-    token: withEnv({ type: "string", required: true }, "GREET_TOKEN"),
+    token: { type: "string", required: true, env: "GREET_TOKEN" },
     plain: { type: "string" },
     target: { type: "positional", required: false },
   },
@@ -100,6 +100,171 @@ describe("env", () => {
     expect(error).toMatchObject({ errors: [{ code: "err:arg:conflict" }] });
   });
 
+  test.each<{ name: string; options: object; argv: string[] }>([
+    { name: "text", options: {}, argv: [] },
+    { name: "--json", options: {}, argv: ["--json"] },
+    { name: "renderValidationErrors: null", options: { renderValidationErrors: null }, argv: [] },
+    { name: "usageSilent", options: { usageSilent: true }, argv: [] },
+  ])(
+    "when a variable is invalid ($name), gunshi reports it exactly as the same value on the command line",
+    async ({ options, argv }) => {
+      // Arrange
+      const times = define({
+        name: "greet",
+        args: { ...jsonArgs, times: { type: "number", env: "GREET_TIMES" } },
+        run: () => ({}),
+      });
+      const report = async (args: string[]) => {
+        const stderr = vi.spyOn(console, "error").mockImplementation(() => {});
+        const hook: unknown[] = [];
+        const outcome = await cli(args, times, {
+          name: "greet",
+          validationErrorExitCode: 2,
+          onErrorCommand: (_c, error) => void hook.push(error),
+          plugins: [env()],
+          ...options,
+        }).then(
+          () => "resolved",
+          (error: unknown) => (error instanceof AggregateError ? "rejected" : error),
+        );
+        const exitCode = process.exitCode;
+        process.exitCode = undefined;
+        const printed = stderr.mock.calls.map((call) => String(call[0]));
+        stderr.mockRestore();
+        return { outcome, exitCode, printed, hook: hook.map((e) => e?.constructor.name) };
+      };
+
+      // Act
+      const fromFlag = await report([...argv, "--times", "many"]);
+      vi.stubEnv("GREET_TIMES", "many");
+      const fromVariable = await report(argv);
+
+      // Assert
+      expect(fromVariable).toEqual(fromFlag);
+    },
+  );
+
+  test("when a variable fills a flag, onBeforeCommand sees the filled value", async () => {
+    // Arrange
+    vi.stubEnv("GREET_TIMES", "3");
+    const seen: unknown[] = [];
+    const times = define({
+      name: "greet",
+      args: { times: { type: "number", env: "GREET_TIMES" } },
+      run: () => {},
+    });
+
+    // Act
+    await cli([], times, {
+      name: "greet",
+      onBeforeCommand: (c) => void seen.push(c.values.times),
+      plugins: [env()],
+    });
+
+    // Assert
+    expect(seen).toEqual([3]);
+  });
+
+  test.each<{ name: string; argv: string[] }>([
+    { name: "two long options", argv: ["--from", "a", "--to", "b"] },
+    { name: "a short and a long option", argv: ["-f", "a", "--to", "b"] },
+    { name: "an option and a positional", argv: ["--from", "a", "x"] },
+  ])(
+    "when $name given on the command line conflict, gunshi's conflict error is reported once",
+    async ({ argv }) => {
+      // Arrange
+      const conflicting = define({
+        name: "greet",
+        args: {
+          from: { type: "string", short: "f", conflicts: ["to", "target"], env: "GREET_FROM" },
+          to: { type: "string", env: "GREET_TO" },
+          target: { type: "positional", required: false },
+        },
+        run: () => {},
+      });
+
+      // Act
+      const running = cli(argv, conflicting, {
+        name: "greet",
+        renderValidationErrors: null,
+        plugins: [env()],
+      });
+
+      // Assert
+      await expect(running).rejects.toMatchObject({ errors: [{ code: "err:arg:conflict" }] });
+    },
+  );
+
+  test.each<{ name: string; argv: string[] }>([
+    { name: "a short option", argv: ["-f", "a"] },
+    { name: "a negated option", argv: ["--no-quiet"] },
+    { name: "a positional", argv: ["x"] },
+  ])(
+    "when $name on the command line conflicts with a flag from a variable, the error names it as gunshi does",
+    async ({ argv }) => {
+      // Arrange
+      const conflicting = define({
+        name: "greet",
+        args: {
+          from: { type: "string", short: "f", conflicts: "to" },
+          quiet: { type: "boolean", negatable: true, conflicts: "to" },
+          to: { type: "string", conflicts: "targetName", env: "GREET_TO" },
+          targetName: { type: "positional", required: false, toKebab: true },
+        },
+        run: () => {},
+      });
+      const messages = (args: string[]) =>
+        cli(args, conflicting, { name: "greet", renderValidationErrors: null, plugins: [env()] })
+          .catch((e: AggregateError) => e)
+          .then((e) => (e as AggregateError).errors.map((err: Error) => err.message));
+
+      // Act
+      const fromFlag = await messages([...argv, "--to", "b"]);
+      vi.stubEnv("GREET_TO", "b");
+      const fromVariable = await messages(argv);
+
+      // Assert
+      expect(fromVariable).toEqual(fromFlag);
+    },
+  );
+
+  test("when a variable asks for JSON, the command's ctx.log is silenced as with --json", async () => {
+    // Arrange
+    vi.stubEnv("GREET_JSON", "1");
+    const log = vi.spyOn(console, "log").mockImplementation(() => {});
+    const greet = define({
+      name: "greet",
+      args: { ...jsonArgs, json: { ...jsonArgs.json, env: "GREET_JSON" } },
+      run: (c) => {
+        c.log("hello");
+        return { ok: true };
+      },
+    });
+
+    // Act
+    await cli([], greet, { name: "greet", renderHeader: null, plugins: [env()] });
+
+    // Assert
+    expect(log.mock.calls.map((call) => String(call[0]))).toEqual(['{"ok":true}']);
+  });
+
+  test("when a positional names a variable, running the command fails instead of ignoring it", async () => {
+    // Arrange
+    const positional = define({
+      name: "greet",
+      args: { target: { type: "positional", env: "GREET_TARGET" } },
+      run: () => {},
+    });
+
+    // Act
+    const running = cli(["x"], positional, { name: "greet", plugins: [env()] });
+
+    // Assert
+    await expect(running).rejects.toThrow(
+      "env is only read for flags, not for the positional target",
+    );
+  });
+
   test("when a required flag is only set in its variable, gunshi still requires it on the command line", async () => {
     // Arrange
     const variables = { GREET_TOKEN: "t" };
@@ -117,7 +282,7 @@ describe("env", () => {
     const conflicting = define({
       name: "greet",
       args: {
-        from: withEnv({ type: "string", conflicts: "target" }, "GREET_FROM"),
+        from: { type: "string", conflicts: "target", env: "GREET_FROM" },
         target: { type: "positional", required: false },
       },
       run: () => {},
@@ -140,7 +305,7 @@ describe("env", () => {
     vi.stubEnv("APP_PROJECT", "web");
     const global = plugin({
       id: "x:global",
-      setup: (ctx) => ctx.addGlobalOption("project", withEnv({ type: "string" }, "APP_PROJECT")),
+      setup: (ctx) => ctx.addGlobalOption("project", { type: "string", env: "APP_PROJECT" }),
     });
     const show = define({ name: "show", run: (c) => console.log(JSON.stringify(c.values)) });
     const log = vi.spyOn(console, "log").mockImplementation(() => {});

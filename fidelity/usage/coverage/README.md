@@ -10,61 +10,68 @@ Every spec also has:
 
 <!-- BEGIN base -->
 
-`arg.double_dash`, `arg.hide`, `cmd.arg`, `cmd.effect`, `cmd.flag`, `cmd.help`, `cmd.hide`, `flag.action`, `flag.builtin`, `flag.help`, `spec.arg`, `spec.bin`, `spec.cmd`, `spec.disable_help`, `spec.disable_version_flag`, `spec.flag`, `spec.name`, `spec.subcommand_negates_reqs`
+`arg.double_dash`, `arg.hide`, `cmd.arg`, `cmd.effect`, `cmd.flag`, `cmd.help`, `cmd.hide`, `flag.action`, `flag.builtin`, `flag.help`, `spec.arg`, `spec.bin`, `spec.cmd`, `spec.disable_help`, `spec.disable_version_flag`, `spec.flag`, `spec.name`, `spec.subcommand_negates_reqs`, `spec.unknown_flags`
 <!-- END base -->
 
 <!-- BEGIN properties -->
 
-| Property                            | Key                                                                                                                                        |
-| ----------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
-| `ArgSchema.type`                    | `cmd.arg`, `cmd.flag`, `flag.bool_value`, `spec.arg`, `spec.flag`                                                                          |
-| `ArgSchema.short`                   | spelling only                                                                                                                              |
-| `ArgSchema.description`             | `arg.help`, `flag.help`                                                                                                                    |
-| `ArgSchema.hidden`                  | `arg.hide`, `flag.hide`                                                                                                                    |
-| `ArgSchema.metavar`                 | spelling only                                                                                                                              |
-| `ArgSchema.multiple`                | `flag.var`                                                                                                                                 |
-| `ArgSchema.negatable`               | `flag.negate`                                                                                                                              |
-| `ArgSchema.parse`                   | —                                                                                                                                          |
-| `ArgSchema.required`                | `flag.required`                                                                                                                            |
-| `ArgSchema.default`                 | `arg.default`, `flag.default`                                                                                                              |
-| `ArgSchema.choices`                 | `flag.choices`                                                                                                                             |
-| `ArgSchema.conflicts`               | `flag.conflicts`                                                                                                                           |
-| `ArgSchema.toKebab`                 | spelling only                                                                                                                              |
-| `Command.name`                      | —                                                                                                                                          |
-| `Command.description`               | `cmd.help`                                                                                                                                 |
-| `Command.args`                      | `cmd.flag`, `spec.flag`                                                                                                                    |
-| `Command.examples`                  | `cmd.example`, `spec.example`                                                                                                              |
-| `Command.run`                       | —                                                                                                                                          |
-| `Command.toKebab`                   | spelling only                                                                                                                              |
-| `Command.internal`                  | `cmd.hide`                                                                                                                                 |
-| `Command.entry`                     | —                                                                                                                                          |
-| `Command.rendering`                 | —                                                                                                                                          |
-| `Command.subCommands`               | `arg.double_dash`, `arg.hide`, `cmd.arg`, `cmd.cmd`, `cmd.flag`, `cmd.subcommand_negates_reqs`, `flag.action`, `flag.builtin`, `flag.help` |
-| `CliOptions.cwd`                    | —                                                                                                                                          |
-| `CliOptions.name`                   | spelling only                                                                                                                              |
-| `CliOptions.description`            | `spec.about`                                                                                                                               |
-| `CliOptions.version`                | `spec.version`                                                                                                                             |
-| `CliOptions.subCommands`            | `arg.double_dash`, `arg.hide`, `cmd.arg`, `cmd.flag`, `flag.action`, `flag.builtin`, `flag.help`, `spec.cmd`                               |
-| `CliOptions.leftMargin`             | —                                                                                                                                          |
-| `CliOptions.middleMargin`           | —                                                                                                                                          |
-| `CliOptions.usageOptionType`        | —                                                                                                                                          |
-| `CliOptions.usageOptionValue`       | —                                                                                                                                          |
-| `CliOptions.usageSilent`            | —                                                                                                                                          |
-| `CliOptions.strict`                 | `spec.unknown_flags`                                                                                                                       |
-| `CliOptions.renderUsage`            | —                                                                                                                                          |
-| `CliOptions.renderHeader`           | —                                                                                                                                          |
-| `CliOptions.renderValidationErrors` | —                                                                                                                                          |
-| `CliOptions.fallbackToEntry`        | `arg.hide`, `spec.arg`                                                                                                                     |
-| `CliOptions.plugins`                | `arg.double_dash`, `arg.hide`, `cmd.arg`, `cmd.flag`, `flag.action`, `flag.builtin`, `flag.help`, `spec.cmd`, `spec.flag`                  |
-| `CliOptions.onBeforeCommand`        | —                                                                                                                                          |
-| `CliOptions.onAfterCommand`         | —                                                                                                                                          |
-| `CliOptions.onErrorCommand`         | —                                                                                                                                          |
+| Property                             | Key                                                                                                                                                    |
+| ------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `ArgSchema.type`                     | `cmd.arg`, `cmd.flag`, `flag.bool_value`, `spec.arg`, `spec.flag`                                                                                      |
+| `ArgSchema.short`                    | spelling only                                                                                                                                          |
+| `ArgSchema.description`              | `arg.help`, `flag.help`                                                                                                                                |
+| `ArgSchema.hidden`                   | `arg.hide`, `flag.hide`                                                                                                                                |
+| `ArgSchema.metavar`                  | spelling only                                                                                                                                          |
+| `ArgSchema.multiple`                 | `flag.var`                                                                                                                                             |
+| `ArgSchema.negatable`                | `flag.negate`                                                                                                                                          |
+| `ArgSchema.parse`                    | —                                                                                                                                                      |
+| `ArgSchema.required`                 | `flag.required`                                                                                                                                        |
+| `ArgSchema.default`                  | `arg.default`, `flag.default`                                                                                                                          |
+| `ArgSchema.choices`                  | `flag.choices`                                                                                                                                         |
+| `ArgSchema.conflicts`                | `flag.conflicts`                                                                                                                                       |
+| `ArgSchema.toKebab`                  | spelling only                                                                                                                                          |
+| `ArgSchema.deprecated`               | —                                                                                                                                                      |
+| `Command.name`                       | —                                                                                                                                                      |
+| `Command.description`                | `cmd.help`                                                                                                                                             |
+| `Command.args`                       | `cmd.flag`, `spec.flag`                                                                                                                                |
+| `Command.examples`                   | `cmd.example`, `spec.example`                                                                                                                          |
+| `Command.run`                        | —                                                                                                                                                      |
+| `Command.toKebab`                    | spelling only                                                                                                                                          |
+| `Command.internal`                   | `cmd.hide`                                                                                                                                             |
+| `Command.aliases`                    | —                                                                                                                                                      |
+| `Command.deprecated`                 | —                                                                                                                                                      |
+| `Command.passthrough`                | —                                                                                                                                                      |
+| `Command.entry`                      | —                                                                                                                                                      |
+| `Command.rendering`                  | —                                                                                                                                                      |
+| `Command.subCommands`                | `arg.double_dash`, `arg.hide`, `cmd.arg`, `cmd.cmd`, `cmd.flag`, `cmd.subcommand_negates_reqs`, `flag.action`, `flag.builtin`, `flag.help`, `spec.cmd` |
+| `CliOptions.cwd`                     | —                                                                                                                                                      |
+| `CliOptions.name`                    | spelling only                                                                                                                                          |
+| `CliOptions.description`             | `spec.about`                                                                                                                                           |
+| `CliOptions.version`                 | `spec.version`                                                                                                                                         |
+| `CliOptions.subCommands`             | `arg.double_dash`, `arg.hide`, `cmd.arg`, `cmd.flag`, `flag.action`, `flag.builtin`, `flag.help`, `spec.cmd`                                           |
+| `CliOptions.leftMargin`              | —                                                                                                                                                      |
+| `CliOptions.middleMargin`            | —                                                                                                                                                      |
+| `CliOptions.usageOptionType`         | —                                                                                                                                                      |
+| `CliOptions.usageOptionValue`        | —                                                                                                                                                      |
+| `CliOptions.usageSilent`             | —                                                                                                                                                      |
+| `CliOptions.strict`                  | spelling only                                                                                                                                          |
+| `CliOptions.strictPositionals`       | —                                                                                                                                                      |
+| `CliOptions.helpHint`                | —                                                                                                                                                      |
+| `CliOptions.validationErrorExitCode` | —                                                                                                                                                      |
+| `CliOptions.renderUsage`             | —                                                                                                                                                      |
+| `CliOptions.renderHeader`            | —                                                                                                                                                      |
+| `CliOptions.renderValidationErrors`  | —                                                                                                                                                      |
+| `CliOptions.fallbackToEntry`         | `arg.hide`, `spec.arg`                                                                                                                                 |
+| `CliOptions.plugins`                 | `arg.double_dash`, `arg.hide`, `cmd.arg`, `cmd.flag`, `flag.action`, `flag.builtin`, `flag.help`, `spec.cmd`, `spec.flag`                              |
+| `CliOptions.onBeforeCommand`         | —                                                                                                                                                      |
+| `CliOptions.onAfterCommand`          | —                                                                                                                                                      |
+| `CliOptions.onErrorCommand`          | —                                                                                                                                                      |
 
 <!-- END properties -->
 
 ## Plugin metadata
 
-The same comparison for what the plugins add to gunshi's definitions: `withUsage`, `complete`, and the options of `usage()` from gunshi-plugin-usage, and `withEnv` from gunshi-plugin-env.
+The same comparison for what the plugins add to gunshi's definitions: `withUsage`, `ArgSchema.complete`, and the options of `usage()` from gunshi-plugin-usage, and `ArgSchema.env` from gunshi-plugin-env.
 
 <!-- BEGIN plugin -->
 
@@ -86,8 +93,8 @@ The same comparison for what the plugins add to gunshi's definitions: `withUsage
 | `UsageOptions.description`     | spelling only                                         |
 | `UsageOptions.flagsets`        | `cmd.use`, `flagset.flag`, `spec.flagset`, `spec.use` |
 | `UsageOptions.declaredOnly`    | `flag.global`                                         |
-| `complete()`                   | `arg.complete`, `flag.complete`                       |
-| `withEnv()`                    | `flag.env`                                            |
+| `ArgSchema.complete`           | `arg.complete`, `flag.complete`                       |
+| `ArgSchema.env`                | `flag.env`                                            |
 
 <!-- END plugin -->
 

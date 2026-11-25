@@ -1,5 +1,5 @@
-import env, { withEnv } from "@h3y6e/gunshi-plugin-env";
-import { complete, withUsage } from "@h3y6e/gunshi-plugin-usage";
+import env from "@h3y6e/gunshi-plugin-env";
+import { withUsage } from "@h3y6e/gunshi-plugin-usage";
 import type { UsageMeta, UsageOptions, UsageOutput } from "@h3y6e/gunshi-plugin-usage";
 import { define, plugin } from "gunshi";
 import type { ArgSchema, CliOptions, Command } from "gunshi";
@@ -81,6 +81,10 @@ export const samples: Record<string, Sample> = {
   "ArgSchema.choices": arg([string, { type: "enum", choices: ["a"] }]),
   "ArgSchema.conflicts": arg([string, { ...string, conflicts: "other" }]),
   "ArgSchema.toKebab": arg([string, { ...string, toKebab: true }]),
+  "ArgSchema.deprecated": arg(
+    [string, { ...string, deprecated: true }],
+    [positional, { ...positional, deprecated: true }],
+  ),
   "Command.name": command((on) => (on ? { name: "renamed" } : {})),
   "Command.description": command((on) => (on ? { description: "d" } : {})),
   "Command.args": command((on) => ({ args: on ? { s: string } : none })),
@@ -88,6 +92,9 @@ export const samples: Record<string, Sample> = {
   "Command.run": command(() => ({})),
   "Command.toKebab": command((on) => ({ toKebab: on, args: { fooBar: string } })),
   "Command.internal": command((on) => (on ? { internal: true } : {})),
+  "Command.aliases": command((on) => (on ? { aliases: ["alias"] } : {})),
+  "Command.deprecated": command((on) => (on ? { deprecated: true } : {})),
+  "Command.passthrough": command((on) => (on ? { passthrough: true } : {})),
   "Command.entry": command((on) => (on ? { entry: true } : {})),
   "Command.rendering": command((on) => (on ? { rendering: { header: null } } : {})),
   "Command.subCommands": command((on) =>
@@ -103,7 +110,10 @@ export const samples: Record<string, Sample> = {
   "CliOptions.usageOptionType": options({ usageOptionType: true }),
   "CliOptions.usageOptionValue": options({ usageOptionValue: true }),
   "CliOptions.usageSilent": options({ usageSilent: true }),
-  "CliOptions.strict": options({ strict: true }),
+  "CliOptions.strict": options({ strict: false }),
+  "CliOptions.strictPositionals": options({ strictPositionals: true }),
+  "CliOptions.helpHint": options({ helpHint: false }),
+  "CliOptions.validationErrorExitCode": options({ validationErrorExitCode: 2 }),
   "CliOptions.renderUsage": options({ renderUsage: null }),
   "CliOptions.renderHeader": options({ renderHeader: null }),
   "CliOptions.renderValidationErrors": options({ renderValidationErrors: null }),
@@ -175,9 +185,12 @@ export const pluginSamples: Record<string, Sample> = {
       usage: on ? { flagsets: { shared } } : {},
     })),
   "UsageOptions.declaredOnly": usageOptions({ declaredOnly: true }),
-  "complete()": arg([string, complete(string, "dir")], [positional, complete(positional, "file")]),
-  "withEnv()": (on) =>
-    arg([string, withEnv({ type: "string" }, "APP_FOO_BAR")])(on).map((v) => ({
+  "ArgSchema.complete": arg(
+    [string, { ...string, complete: "dir" }],
+    [positional, { ...positional, complete: "file" }],
+  ),
+  "ArgSchema.env": (on) =>
+    arg([string, { type: "string", env: "APP_FOO_BAR" }])(on).map((v) => ({
       ...v,
       options: { ...v.options, plugins: [env()] },
     })),

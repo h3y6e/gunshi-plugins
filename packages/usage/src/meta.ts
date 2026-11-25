@@ -3,8 +3,6 @@
  * @author h3y6e
  */
 
-import type { ArgSchema } from "gunshi/plugin";
-
 /** A format a command writes to stdout */
 export interface UsageOutput {
   description?: string;
@@ -49,13 +47,9 @@ export function withUsage<C extends object & { commandName?: never }>(
   return { ...command, usage: meta };
 }
 
-/**
- * Set how shells complete an argument's value
- *
- * @param schema - The argument's schema
- * @param type - A usage completion type such as `dir`, `file`, or `file:json`
- * @returns A new schema that completes as `type`
- */
-export function complete<S extends ArgSchema>(schema: S, type: string): S & { complete: string } {
-  return { ...schema, complete: type };
+declare module "gunshi" {
+  interface ArgSchema {
+    /** How shells complete the value: a usage completion type such as `dir`, `file`, or `file:json` */
+    complete?: string;
+  }
 }

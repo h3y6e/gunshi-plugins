@@ -3,12 +3,12 @@ import { mkdtempSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 
-import env, { withEnv } from "@h3y6e/gunshi-plugin-env";
+import env from "@h3y6e/gunshi-plugin-env";
 import { cli, define, lazy } from "gunshi";
 import { plugin } from "gunshi/plugin";
 import { afterAll, beforeAll, describe, expect, test, vi } from "vitest";
 
-import usage, { complete, withUsage } from "./index.ts";
+import usage, { withUsage } from "./index.ts";
 import type { UsageOptions } from "./index.ts";
 
 type Options = NonNullable<Parameters<typeof cli>[2]>;
@@ -174,8 +174,8 @@ const fixtures: {
     entry: define({
       name: "app",
       args: {
-        file: complete({ type: "positional" }, "file:json"),
-        out: complete({ type: "string" }, "dir"),
+        file: { type: "positional", complete: "file:json" },
+        out: { type: "string", complete: "dir" },
       },
       run,
     }),
@@ -244,11 +244,13 @@ const fixtures: {
         plugin({
           id: "x:globals",
           setup: (ctx) => {
-            ctx.addGlobalOption(
-              "project",
-              withEnv({ type: "string", short: "C", metavar: "dir" }, "APP_PROJECT"),
-            );
-            ctx.addGlobalOption("as", withEnv({ type: "string", metavar: "actor" }, "APP_ACTOR"));
+            ctx.addGlobalOption("project", {
+              type: "string",
+              short: "C",
+              metavar: "dir",
+              env: "APP_PROJECT",
+            });
+            ctx.addGlobalOption("as", { type: "string", metavar: "actor", env: "APP_ACTOR" });
             ctx.addGlobalOption("no-color", { type: "boolean" });
           },
         }),
@@ -334,7 +336,13 @@ describe("usage metadata", () => {
     async ({ entry, options, usage: usageOptions, expected }) => {
       // Arrange
       const name = usageOptions?.name ?? "app";
-      const kdl = [`name "${name}"`, 'bin "app"', expected.replaceAll(/^ {6}/gm, ""), usageCommand]
+      const kdl = [
+        `name "${name}"`,
+        'bin "app"',
+        'unknown_flags "error"',
+        expected.replaceAll(/^ {6}/gm, ""),
+        usageCommand,
+      ]
         .join("\n")
         .replaceAll("\n\n", "\n");
 

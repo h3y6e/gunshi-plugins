@@ -36,8 +36,8 @@ importers:
         specifier: workspace:*
         version: link:../packages/usage
       gunshi:
-        specifier: ^1.0.0-rc.1
-        version: 1.0.0-rc.1
+        specifier: ^1.0.0-rc.13
+        version: 1.0.0-rc.13
 
   fidelity/usage:
     dependencies:
@@ -48,8 +48,8 @@ importers:
         specifier: workspace:*
         version: link:../../packages/usage
       gunshi:
-        specifier: ^1.0.0-rc.1
-        version: 1.0.0-rc.1
+        specifier: ^1.0.0-rc.13
+        version: 1.0.0-rc.13
     devDependencies:
       '@ast-grep/lang-rust':
         specifier: 0.0.7
@@ -64,8 +64,8 @@ importers:
   packages/env:
     devDependencies:
       gunshi:
-        specifier: 1.0.0-rc.1
-        version: 1.0.0-rc.1
+        specifier: 1.0.0-rc.13
+        version: 1.0.0-rc.13
       publint:
         specifier: 0.3.25
         version: 0.3.25
@@ -79,8 +79,8 @@ importers:
         specifier: workspace:*
         version: link:../env
       gunshi:
-        specifier: 1.0.0-rc.1
-        version: 1.0.0-rc.1
+        specifier: 1.0.0-rc.13
+        version: 1.0.0-rc.13
       publint:
         specifier: 0.3.25
         version: 0.3.25
@@ -925,8 +925,8 @@ packages:
     resolution: {integrity: sha512-X6fBC0pmImC70gvX2zm56go9hx0MyoGVdG0tUCkg/D+Xnh5TJsOZ7iDbOdI3PvmtrDxnu1YdDufpK2QJX1Meqw==}
     engines: {node: '>=20.20.0'}
 
-  gunshi@1.0.0-rc.1:
-    resolution: {integrity: sha512-/nSFKVrJHKg9O4ppBl+lOSLDQWmvJ5fG3ldVsdJX8KMtUV2uYwlx/a8OaOWuvniuV28bZDjsB8p6YFtDxSlMcw==}
+  gunshi@1.0.0-rc.13:
+    resolution: {integrity: sha512-lwf4PoTV9eCEYOnZuL4YTG3gbmdA109u26TKNWOyRv5s/Db3vODZ7pfuxRPfRakHAzpm/eNYR7K1rUo9LCTCCw==}
     engines: {node: '>= 22'}
 
   hookable@6.1.2:
@@ -1733,7 +1733,7 @@ snapshots:
     dependencies:
       resolve-pkg-maps: 1.0.0
 
-  gunshi@1.0.0-rc.1: {}
+  gunshi@1.0.0-rc.13: {}
 
   hookable@6.1.2: {}
 
