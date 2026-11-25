@@ -2,5 +2,5 @@
 	vPrefix = true
 	releaseBranch = main
 	tagPrefix = packages/usage
-	versionFile = packages/usage/package.json,packages/usage/jsr.json
+	versionFile = packages/usage/package.json
 	changelog = false

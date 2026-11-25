@@ -21,7 +21,6 @@ afterAll(() => {
 describe.each([
   { runtime: "node", command: ["node"] },
   { runtime: "bun", command: ["bun"] },
-  { runtime: "deno", command: ["deno", "run", "-A"] },
 ])("the usage example on $runtime", ({ runtime, command }) => {
   function run(args: string[], env: Record<string, string> = {}) {
     const [bin = "", ...rest] = command;

@@ -11,7 +11,6 @@ const cli = fileURLToPath(new URL("cli.ts", import.meta.url));
 describe.each([
   { runtime: "node", command: ["node"] },
   { runtime: "bun", command: ["bun"] },
-  { runtime: "deno", command: ["deno", "run", "-A"] },
 ])("the example with every plugin on $runtime", ({ command }) => {
   function run(args: string[], env: Record<string, string> = {}) {
     const [bin = "", ...rest] = command;
